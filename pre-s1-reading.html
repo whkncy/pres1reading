@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Pre-S1 HKAT Reading Practice Portal</title>
+    <style>
+        :root {
+            --slate-base: #1e293b;
+            --slate-border: #cbd5e1;
+            --primary-accent: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-green: #10b981;
+            --success-bg: #ecfdf5;
+            --error-red: #ef4444;
+            --error-bg: #fef2f2;
+            --panel-bg: #f8fafc;
+            --text-main: #334155;
+            --text-dark: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--slate-base);
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .header-title p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        select {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background-color: #334155;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:hover {
+            background-color: #475569;
+        }
+
+        .score-badge {
+            background-color: #334155;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .score-val {
+            color: #38bdf8;
+        }
+
+        .main-workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pane {
+            width: 50%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 30px;
+            transition: width 0.2s;
+        }
+
+        .left-pane {
+            background-color: white;
+            border-right: 1px solid var(--slate-border);
+            line-height: 1.7;
+        }
+
+        .right-pane {
+            background-color: var(--panel-bg);
+        }
+
+        .part-tabs {
+            display: flex;
+            background-color: #e2e8f0;
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            color: var(--text-dark);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .text-container h2 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .text-passage {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            white-space: pre-line;
+        }
+
+        .leaflet-box {
+            border: 2px dashed var(--slate-border);
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fafafa;
+            margin-top: 15px;
+        }
+
+        .question-block {
+            background: white;
+            border: 1px solid var(--slate-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-accent);
+        }
+
+        .q-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .option-item:hover:not(:disabled) {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-letter {
+            font-weight: 700;
+            margin-right: 12px;
+            color: #94a3b8;
+            background: white;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .option-item.selected-correct {
+            background-color: var(--success-bg) !important;
+            border-color: var(--success-green) !important;
+            color: #065f46 !important;
+        }
+        .option-item.selected-correct .option-letter {
+            background-color: var(--success-green);
+            color: white;
+            border-color: var(--success-green);
+        }
+
+        .option-item.selected-incorrect {
+            background-color: var(--error-bg) !important;
+            border-color: var(--error-red) !important;
+            color: #991b1b !important;
+        }
+        .option-item.selected-incorrect .option-letter {
+            background-color: var(--error-red);
+            color: white;
+            border-color: var(--error-red);
+        }
+
+        .feedback-box {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .feedback-box.show {
+            display: block;
+        }
+
+        .feedback-box.correct-style {
+            background-color: var(--success-bg);
+            border-left: 4px solid var(--success-green);
+            color: #065f46;
+        }
+
+        .feedback-box.incorrect-style {
+            background-color: var(--error-bg);
+            border-left: 4px solid var(--error-red);
+            color: #991b1b;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            border: 1px solid var(--slate-border);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .matrix-table th:first-child, .matrix-table td:first-child {
+            text-align: left;
+            width: 50%;
+        }
+
+        .matrix-radio {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .input-blank {
+            width: 140px;
+            padding: 6px 10px;
+            border: 1px solid var(--slate-border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-dark);
+        }
+
+        .input-blank:focus {
+            border-color: var(--primary-accent);
+            outline: none;
+        }
+
+        .input-blank.inline-correct {
+            background-color: var(--success-bg);
+            border-color: var(--success-green);
+            color: #065f46;
+        }
+
+        .input-blank.inline-incorrect {
+            background-color: var(--error-bg);
+            border-color: var(--error-red);
+            color: #991b1b;
+        }
+
+        .action-footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .validate-btn {
+            background-color: var(--primary-accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .validate-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .vocab-sidebar {
+            position: fixed;
+            right: -320px;
+            top: 58px;
+            width: 320px;
+            height: calc(100vh - 58px);
+            background-color: white;
+            border-left: 1px solid var(--slate-border);
+            box-shadow: -2px 0 12px rgba(0,0,0,0.05);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vocab-sidebar.open {
+            right: 0;
+        }
+
+        .vocab-trigger-btn {
+            background-color: #475569;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vocab-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            background-color: var(--panel-bg);
+        }
+
+        .vocab-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .vocab-item {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .vocab-word {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        .vocab-def {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .vocab-ex {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--text-main);
+            margin-top: 4px;
+            background: var(--panel-bg);
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>Pre-S1 HKAT Reading Portal</h1>
+            <p>Mock Papers 1-7 Diagnostic Engine</p>
+        </div>
+        <div class="nav-controls">
+            <select id="paper-select" onchange="loadPaper(this.value)">
+                <option value="paper1">Mock Paper 1 (Archie's Edition)</option>
+                <option value="paper2">Mock Paper 2 (Megan/Tommy Edition)</option>
+                <option value="paper3">Mock Paper 3 (Adam's Edition)</option>
+                <option value="paper4">Mock Paper 4 (Eden's Edition)</option>
+                <option value="paper5">Mock Paper 5 (Jasmine's Edition)</option>
+                <option value="paper6">Mock Paper 6 (Jim's Edition)</option>
+                <option value="paper7">Mock Paper 7 (Ben's Edition)</option>
+            </select>
+            <div class="score-badge">
+                <span>Score:</span>
+                <span id="score-counter" class="score-val">0</span>
+            </div>
+            <button class="vocab-trigger-btn" onclick="toggleVocab()">
+                📚 Vocab Booster
+            </button>
+        </div>
+    </header>
+
+    <div class="main-workspace">
+        <div class="pane left-pane" id="text-pane">
+            <div class="part-tabs">
+                <button class="tab-btn active" id="tab-p1" onclick="switchPart(1)">Part 1 (Leaflet/Notices)</button>
+                <button class="tab-btn" id="tab-p2" onclick="switchPart(2)">Part 2 (Explanatory Feature)</button>
+                <button class="tab-btn" id="tab-p3" onclick="switchPart(3)">Part 3 (Narrative Blog/Diary)</button>
+            </div>
+            <div id="text-content" class="text-container">
+                </div>
+        </div>
+
+        <div class="pane right-pane" id="question-pane">
+            <div id="questions-content">
+                </div>
+        </div>
+    </div>
+
+    <div class="vocab-sidebar" id="vocab-sidebar">
+        <div class="vocab-header">
+            <h3>Theme Vocabulary Booster</h3>
+            <p style="font-size:0.8rem; color:#64748b;">Contextual high-frequency keywords extracted from HKAT assessment frameworks.</p>
+        </div>
+        <div class="vocab-list" id="vocab-list-target">
+            </div>
+    </div>
+
+    <script>
+        // Data Vault containing all text, tracking indices, correct solutions, and context clues
+        const mockDatabase = {
+            paper1: {
+                vocab: [
+                    { w: "sculptures", d: "n. Three-dimensional art pieces carved or modeled.", e: "We saw giant ice sculptures at the freezing winter carnival festival." },
+                    { w: "temperature", d: "n. Measurement of heat or cold intensity.", e: "The room temperature drops significantly during the nighttime hours." },
+                    { w: "glazing", d: "n. Coating of glass-like paint layers put over clay pottery items.", e: "The artisan completed the clay pot by brushing a protective glazing layer." },
+                    { w: "leisure", d: "n. Spare time spent relaxing outside work tasks.", e: "Drinking afternoon milk tea is a common local expression of pure leisure." }
+                ],
+                part1: {
+                    title: "Christmas Special Holiday Tour Programs",
+                    text: `[Notice 1] Harbin Winter Ice Wonderland Tour
+                    Explore majestic frozen castles and giant snow installations! 
+                    • Notice Requirement: All travelers are strictly required to verify they hold a valid, unexpired Mainland Travel Permit before finalizing departure booking windows.
+
+                    [Notice 2] Sapporo Romantic German Christmas Market Exchange
+                    • Experience the winter fairy-tale blending Japanese powder snow fields with a fully functional replica of the authentic German Christmas Market arrays right in Sapporo.
+
+                    [Notice 3] Zermatt Mountain Lodge Escape
+                    • Accommodations feature pristine, high-altitude hotel architectures with every room panoramic window opening straight onto an unobstructed view of the alpine Matterhorn mountain range.
+                    • Advisory: Remote mountain outposts are non-digital points. Visitors must carry physical cash reserves for immediate local transactions.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What item is mandatory for checking into the Harbin Winter Tour package?", opts: { A: "Passport only", B: "German Visa documents", C: "Digital payment wallet apps", D: "Mainland Travel Permit" }, ans: "D", clue: "Paragraph 1 explicitly notes that all participants must hold a valid Mainland Travel Permit to travel to Harbin." },
+                        { id: 18, type: "mcq", q: "What makes the Sapporo Winter Tour distinct from other options?", opts: { A: "It takes place in Europe", B: "It requires cash only", C: "It features a specialized German Christmas Market installation", D: "It is free of charge" }, ans: "C", clue: "The notice highlights that the Sapporo tour includes a special visit to the German Christmas Market set up in Sapporo." },
+                        { id: 19, type: "mcq", q: "What is featured outside the hotel windows of the Zermatt resort option?", opts: { A: "A busy train station view", B: "A shopping mall", C: "An alpine mountain peak view", D: "The Harbin ice castle structure" }, ans: "C", clue: "The text specifies that the hotel window features a scenic mountain view looking out at the Matterhorn." },
+                        { id: 20, type: "mcq", q: "What must travelers traveling to the Zermatt resort organize in advance?", opts: { A: "A credit card upgrade", B: "An alpine skiing license", C: "A winter coat rental profile", D: "Sufficient physical cash bills" }, ans: "D", clue: "The advisory states that some locations only accept cash, meaning travelers must prepare cash." },
+                        { id: 21, type: "mcq", q: "Judy wants a nature retreat running exclusively inside December 21–30. Which option aligns with her requirements?", opts: { A: "Harbin Winter Tour", B: "Zermatt Mountain Escape", C: "Sapporo Romantic Market", D: "None of the above" }, ans: "B", clue: "Zermatt matches the nature criteria (Matterhorn peak) and covers the late December slot safely." },
+                        { id: 22, type: "gap", q: "Fill in the gaps based on the notice descriptions above:", inputs: [
+                            { label: "Harbin is famous for its massive winter festival showcasing giant ice ", standard: "sculptures" },
+                            { label: "Travelers heading up into alpine heights must monitor the falling air ", standard: "temperature" }
+                        ]}
+                    ]
+                },
+                part2: {
+                    title: "The Historical Evolution of Tea Culture & Teapots",
+                    text: `Paragraph (i) [Historical Genesis]
+                    Long ago, tea was accidentally found in ancient China when leaves blew into boiling water. Over time, it transformed from a medicine into a prized royal drink enjoyed daily across kingdoms.
+
+                    Paragraph (ii) [The Art of Pottery and Kilns]
+                    To create fine teapots, skilled potters shape specialized purple clay into hollow vessels. Afterward, they paint on a defensive layer called 'glazing' before firing the pots in extreme kiln temperatures.
+
+                    Paragraph (iii) [Regional Aesthetics and Adaptations]
+                    Chinese designs favored round shapes meant for single-person steeping. As trading expanded to Europe, designers altered the shape, making the teapots much taller and pear-shaped to hold larger volumes.
+
+                    Paragraph (iv) [Social Integration]
+                    In England, afternoon tea became a symbol of relaxation and leisure, where people gathered to chat and share news.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "Where was tea originally discovered?", opts: { A: "England", B: "China", C: "Germany", D: "Japan" }, ans: "B", clue: "Paragraph (i) shows that tea was first discovered/invented in China." },
+                        { id: 24, type: "mcq", q: "What does the word 'glazing' represent in pottery making?", opts: { A: "Breaking down raw clay materials", B: "Boiling water inside a fresh pot", C: "Exporting pots to overseas markets", D: "Painting a special glossy coat layer on clay before baking" }, ans: "D", clue: "Paragraph (ii) confirms glazing is putting on a layer of special glass-like paint." },
+                        { id: 25, type: "mcq", q: "Which option represents the classic traditional European adaptation style?", opts: { A: "Taller, pear-shaped bodies", B: "Flat, round-bottom designs", C: "Extremely small cups", D: "No handles attached" }, ans: "A", clue: "Paragraph (iii) shows European designs changed to become taller and pear-shaped to match large tea sessions." },
+                        { id: 26, type: "mcq", q: "What does afternoon tea symbolize within English social structures?", opts: { A: "Work deadlines", B: "Fast food dining", C: "Leisure, relaxation, and conversation", D: "Early morning routines" }, ans: "C", clue: "Paragraph (iv) explicitly notes that tea serves as a symbol of leisure and free time in England." },
+                        { id: 27, type: "mcq", q: "What is the primary intent of the author of this passage?", opts: { A: "To complain about modern pricing structures", B: "To provide historical and cultural facts regarding tea and teapots", C: "To sell premium purple clay products", D: "To review coffee brewing alternatives" }, ans: "B", clue: "The general structure provides an objective timeline of history, designs, and global integration paths." },
+                        { id: 28, type: "matrix", q: "Match each heading option to its corresponding paragraph layout section:", headings: ["The Start of Tea", "Making Teapots", "Teapot Designs", "Tea and Culture"], correctRowAnswers: ["The Start of Tea", "Making Teapots", "Teapot Designs", "Tea and Culture"], rows: ["Paragraph (i)", "Paragraph (ii)", "Paragraph (iii)", "Paragraph (iv)"] }
+                    ]
+                },
+                part3: {
+                    title: "Alex Ng's Community Hub: My Happy Little Shop",
+                    text: `I spent decades running a small neighborhood grocery store down a cozy alleyway. When mobile phones didn't exist yet, I added a heavy public counter telephone outside my storefront, allowing local families to call each other for free. This gesture turned my tiny storefront into a popular neighborhood hub.
+
+                    Local students from the nearby academy became my favorite regular customers. They often dropped by after classes to talk about their school exam stresses because they felt comfortable chatting with me.
+
+                    Now, decades later, high local rents have made it impossible to stay open. I am closing down this weekend to prepare for my retirement. Once everything is packed, my plan is to move to Australia to enjoy my quiet retirement years.
+
+                    Yesterday, I was deeply surprised and grateful when hundreds of my old customers, including students who are now adults, suddenly arrived outside my shop with banners and gifts to wish me well.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "What was Alex Ng's main professional focus during his career?", opts: { A: "Managing real estate operations", B: "Running a telephone network repair company", C: "Operating a community neighborhood grocery shop", D: "Teaching students in Australia" }, ans: "C", clue: "The entry opens with Alex describing his decades of work running his own grocery shop." },
+                        { id: 30, type: "mcq", q: "How did the counter telephone affect Alex's store?", opts: { A: "It caused him large unpaid bills", B: "It made the shop highly popular with families", C: "It disrupted the students' homework habits", D: "It made him switch businesses" }, ans: "B", clue: "Letting customers use the phone for free helped his shop become a popular community hub." },
+                        { id: 31, type: "mcq", q: "What does 'popular neighborhood hub' suggest about the store?", opts: { A: "It was empty", B: "It was failing", C: "It did great and was highly successful", D: "It was loud and dangerous" }, ans: "C", clue: "A neighborhood hub means it was well-liked and very successful within the community." },
+                        { id: 32, type: "mcq", q: "Why did students become Alex's favorite customers?", opts: { A: "They bought his most expensive items", B: "They felt comfortable talking to him about their stresses", C: "They helped him pack boxes", D: "They paid his store rent bills" }, ans: "B", clue: "The text says students remained a favorite because they felt completely relaxed chatting with him." },
+                        { id: 33, type: "mcq", q: "Which factor is NOT a reason why Alex is closing his shop?", opts: { A: "High local rent prices", B: "His plan to retire", C: "Moving to Australia", D: "He ran out of inventory products" }, ans: "D", clue: "Moving to Australia is his post-retirement plan. Running out of items is never listed as a cause for closing down." },
+                        { id: 34, type: "mcq", q: "How did Alex feel during his final weekend in business?", opts: { A: "Angry at the neighborhood families", B: "Anxious about packing boxes", C: "Disappointed by the turnout", D: "Surprised and deeply grateful for the community support" }, ans: "D", clue: "The text explicitly states he felt surprised and grateful when familiar faces returned to thank him." },
+                        { id: 35, type: "matrix", q: "Arrange these lifetime milestones of Alex Ng in the correct historical chronological order:", headings: ["1st Step", "2nd Step", "3rd Step", "4th Step"], correctRowAnswers: ["2nd Step", "4th Step", "3rd Step", "1st Step"], rows: ["Alex worked for a delivery service.", "Alex opened his own grocery shop.", "Alex gave treats to students taking exams.", "Alex moved to Australia."] }
+                    ]
+                }
+            },
+            paper2: {
+                vocab: [
+                    { w: "recommended", d: "v. Advised or suggested something as a good choice.", e: "Tommy always recommended the best classic animated films to young kids." },
+                    { w: "increased", d: "v. Became greater in size, amount, or degree.", e: "The shop rent increased rapidly, forcing many small stores to close down." },
+                    { w: "touched", d: "adj. Feeling deep gratitude or emotional warmth.", e: "He was touched when his old neighborhood customers organized a farewell surprise." }
+                ],
+                part1: {
+                    title: "Exchange Programs for P.6 Students",
+                    text: `[Chengdu Cultural Tour]
+                    Join us on an exciting student adventure to Chengdu, China! Discover the Chengdu Research Base of Giant Panda Breeding, where you can see these rare animals up close. Learn about wildlife conservation work from expert researchers.
+
+                    [Bangkok Youth Adventure]
+                    Get ready to explore the busy, colorful city of Bangkok! Visit the historic Grand Palace to see classic Thai architecture styles. Sail along the Chao Phraya River on traditional long-tail boats to learn about local river trading culture.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What unique experience does the Chengdu Cultural Tour offer?", opts: { A: "Riding on traditional long-tail river boats", B: "Visiting an architectural grand palace complex", C: "Seeing giant pandas up close at a research base", D: "Learning Thai cooking methods" }, ans: "C", clue: "The text specifies that students can see giant pandas up close at the Chengdu base." },
+                        { id: 18, type: "mcq", q: "Which landmark will students visit during the Bangkok adventure?", opts: { A: "The Great Wall", B: "The Grand Palace", C: "An alpine mountain range", D: "A modern shopping mall" }, ans: "B", clue: "The Bangkok itinerary highlights an architectural exploration visit to the Grand Palace." }
+                    ]
+                },
+                part2: {
+                    title: "The Shift in Film Viewing Habits",
+                    text: `Paragraph (i) [Traditional Theater Outposts]
+                    In past decades, watching fresh movie releases meant standing in long lines outside neighborhood cinemas. Movie theaters were rare, making every screening a major weekend social gathering.
+
+                    Paragraph (ii) [The Rise of Video Rental Shops]
+                    During the 1980s, local neighborhood video rental storefronts popped up across cities. Families could browse shelves of VHS cassette tapes and rent popular movies to watch on home players.
+
+                    Paragraph (iii) [The Modern Online Streaming Landscape]
+                    Today, the physical distribution of films has largely disappeared. High-speed internet allows global audiences to stream thousands of titles directly to their personal mobile screens at home.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "How did people primarily watch fresh movie releases in past decades?", opts: { A: "Using mobile smartphone apps", B: "By standing in lines at local neighborhood cinemas", C: "By ordering mail packages", D: "By visiting pottery kilns" }, ans: "B", clue: "Paragraph (i) highlights that viewers queued up outside neighborhood cinemas for new releases." },
+                        { id: 24, type: "mcq", q: "What technology drove the video store rental boom of the 1980s?", opts: { A: "Digital cloud storage options", B: "VHS cassette tapes and home video players", C: "High-speed fiber-optic cables", D: "Purple clay molding processes" }, ans: "B", clue: "Paragraph (ii) links the rise of rental stores directly to the popularity of VHS cassettes." },
+                        { id: 25, type: "matrix", q: "Match the technological era to its correct historical paragraph focus:", headings: ["Theater Era", "Rental Store Era", "Streaming Era"], correctRowAnswers: ["Theater Era", "Rental Store Era", "Streaming Era"], rows: ["Paragraph (i)", "Paragraph (ii)", "Paragraph (iii)"] }
+                    ]
+                },
+                part3: {
+                    title: "Tommy's Nostalgic Video Store: A Changing Scene",
+                    text: `For over thirty years, Tommy managed a small neighborhood video rental shop. He curated an extensive library of classic animated films. Whenever young students visited after school, he was exceptionally nice to them and often recommended the best classic movies.
+
+                    To make his shop cozier, Tommy sometimes provided free popcorn to regular customers during weekend movie viewings inside the storefront.
+
+                    However, as digital movie platforms grew highly popular, fewer families rented physical tapes. Combined with a steep increase in store rent, Tommy had to make the difficult decision to close down and retire to the UK to be with his children.
+
+                    On his final evening, he was deeply touched when his old customers surprised him by organizing a farewell street party directly outside his storefront.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "Why did local students like visiting Tommy's store after school?", opts: { A: "He helped them with their exam studies", B: "He was exceptionally nice to them and recommended great films", C: "He sold cheap textbook materials", D: "He hired them as shop delivery workers" }, ans: "B", clue: "The text directly states students visited because he was exceptionally nice to them." },
+                        { id: 30, type: "mcq", q: "Which factor was NOT a cause for Tommy closing his storefront?", opts: { A: "Digital streaming platforms becoming popular", B: "An increase in monthly shop rent costs", C: "He lost his inventory of animated films", D: "Deciding to retire to the UK to be near family" }, ans: "C", clue: "Losing inventory is never mentioned. High rent and online platforms are listed as the causes." },
+                        { id: 31, type: "mcq", q: "Why did Tommy feel deeply touched on his final evening at the shop?", opts: { A: "He sold his remaining movie tapes for a high price", B: "His old customers surprised him with a farewell street party", C: "His travel documents to the UK arrived early", D: "His monthly store rent was lowered" }, ans: "B", clue: "The text highlights that the farewell street party organized by old customers touched him deeply." },
+                        { id: 32, type: "matrix", q: "Arrange Tommy's professional path milestones in chronological order:", headings: ["Phase 1", "Phase 2", "Phase 3", "Phase 4"], correctRowAnswers: ["Phase 1", "Phase 3", "Phase 2", "Phase 4"], rows: ["Tommy saved up funds to open his store.", "Tommy shared free popcorn and films with neighborhood students.", "Tommy opened his independent rental storefront.", "Tommy moved to the UK for retirement."] }
+                    ]
+                }
+            },
+            paper3: {
+                vocab: [
+                    { w: "orchestra", d: "n. A large group of musicians playing string, woodwind, brass, and percussion instruments together.", e: "The city orchestra performed a beautiful spring symphony." },
+                    { w: "vivid", d: "adj. Producing powerful, clear, and realistic mental images.", e: "The music created a vivid picture of a green forest coming to life." },
+                    { w: "anxious", d: "adj. Feeling worried, nervous, or uneasy about an upcoming event.", e: "Adam felt anxious before walking onto the grand stage." }
+                ],
+                part1: {
+                    title: "The Music in the Park Festival",
+                    text: `[Event 1: Classical Symphonic Matinee]
+                    Experience the power of a live orchestra under the open sky! The City Symphony Orchestra will perform classical masterpieces. 
+                    • Important Rule: Audience members must turn off all mobile devices before the opening note.
+
+                    [Event 2: Youth Choir Showcase]
+                    Hear the clear harmonies of the award-winning Youth Choir as they sing traditional folk songs. The performance features soloist Joanna leading the vocal ensemble.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What rule must guests follow at the Classical Symphonic Matinee?", opts: { A: "They must wear formal suits", B: "They must turn off all mobile devices", C: "They must bring their own instruments", D: "No photography is allowed anywhere" }, ans: "B", clue: "The text directly states that audience members must turn off all mobile devices before the performance starts." },
+                        { id: 18, type: "mcq", q: "Who is featured as the lead soloist for the Youth Choir Showcase?", opts: { A: "Adam", B: "Tommy", C: "Joanna", D: "Alex" }, ans: "C", clue: "The text specifies that soloist Joanna leads the vocal ensemble." }
+                    ]
+                },
+                part2: {
+                    title: "How Classical Music Describes Nature",
+                    text: `Paragraph (i) [Imitating Wildlife Sounds]
+                    Composers often write parts for woodwind instruments to mimic nature. High-pitched flute notes can sound exactly like birds chirping in early spring.
+
+                    Paragraph (ii) [Storm Patterns and Percussion]
+                    To create the dramatic sound of a summer storm, orchestras use loud percussion instruments. Rapid drumbeats mimic rolling thunder, while cymbal crashes sound like lightning strikes.
+
+                    Paragraph (iii) [Water Motifs and Strings]
+                    Flowing rivers and ocean waves are often described using string instruments. Violins playing smooth, continuous patterns create a realistic image of running water.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "Which instrument group is typically used to mimic birds chirping?", opts: { A: "Heavy percussion arrays", B: "Woodwinds like the flute", C: "Large brass sections", D: "Electric guitars" }, ans: "B", clue: "Paragraph (i) points out that high-pitched flute notes mimic birds chirping." },
+                        { id: 24, type: "mcq", q: "What weather effect do rapid drumbeats recreate?", opts: { A: "Gentle spring rain", B: "Rolling thunder in a storm", C: "Blazing summer sunshine", D: "Falling mountain snow" }, ans: "B", clue: "Paragraph (ii) notes that rapid drumbeats mimic rolling thunder." },
+                        { id: 25, type: "matrix", q: "Match the musical instrument group to its natural theme description:", headings: ["Birds Motif", "Storm Motif", "Water Motif"], correctRowAnswers: ["Birds Motif", "Storm Motif", "Water Motif"], rows: ["Paragraph (i)", "Paragraph (ii)", "Paragraph (iii)"] }
+                    ]
+                },
+                part3: {
+                    title: "Adam's Big Stage Debut: A Concert Diary",
+                    text: `Last night was the annual school music concert. I was selected to play the violin alongside the city orchestra. As I waited backstage, looking out at the packed hall, I felt incredibly anxious. My hands were shaking, and I worried I would forget my notes.
+
+                    When the conductor raised her baton, a deep silence fell over the room. We opened with a classical piece meant to paint a vivid picture of spring. As our bows moved together, the smooth violin notes blended perfectly to sound like a flowing river.
+
+                    Hearing the beautiful music around me helped me relax. My nervousness disappeared, and I played every note with confidence. 
+
+                    After the final note, the audience stood up and clapped loudly. Backstage, I met the lead vocalist, Joanna. I was so glad when she praised my performance and agreed to take a photo with me.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "How did Adam feel while waiting backstage before his performance?", opts: { A: "Bored and sleepy", B: "Incredibly anxious and nervous", C: "Overconfident and proud", D: "Angry at the conductor" }, ans: "B", clue: "The text states he felt incredibly anxious, with shaking hands, while waiting backstage." },
+                        { id: 30, type: "mcq", q: "In paragraph 2, how does the orchestra create a 'vivid picture of spring'?", opts: { A: "By displaying nature photos on a screen", B: "Through smooth violin notes that sound like a flowing river", C: "By releasing live birds into the hall", D: "By playing loud drum percussion beats" }, ans: "B", clue: "The text states the smooth violin notes painted a vivid picture of spring by sounding like a flowing river." },
+                        { id: 31, type: "mcq", q: "What happened after Adam finished his musical performance?", opts: { A: "The audience left quietly", B: "The audience stood up and clapped loudly", C: "He forgot his final notes", D: "The conductor stopped the show" }, ans: "B", clue: "The text notes the audience stood up and clapped loudly right after the final note." },
+                        { id: 32, type: "matrix", q: "Put the concert timeline events into the correct sequential order:", headings: ["1st", "2nd", "3rd", "4th"], correctRowAnswers: ["2nd", "1st", "3rd", "4th"], rows: ["Adam felt anxious and watched his hands shake backstage.", "Adam practiced violin parts for months.", "The orchestra played smooth notes to describe a flowing river.", "Adam met Joanna backstage to take a commemorative photo."] }
+                    ]
+                }
+            },
+            paper4: {
+                vocab: [
+                    { w: "analyze", d: "v. To examine something methodically and in detail.", e: "Video game testers analyze software to locate hidden programming bugs." },
+                    { w: "utensils", d: "n. Tools or containers used for cooking or eating food.", e: "Using smaller utensils helps you eat slower and chew better." },
+                    { w: "protesting", d: "v. Expressing strong disapproval or objection publicly.", e: "Eden was protesting loudly when his dad asked him to clean out his old games." }
+                ],
+                part1: {
+                    title: "Fascinating Modern Career Fields",
+                    text: `[Profile A: Stage Costume Tailor]
+                    • These specialists work closely with theater productions. They analyze clothing details and adjust stage costumes under bright lights to ensure actors can move comfortably during live shows.
+
+                    [Profile B: Video Game Tester]
+                    • Testers play unreleased games to search for hidden programming bugs. They must think like an actual hacker to find system issues, reporting every error back to the development company.
+
+                    [Profile C: Cosmetic Formulation Reviewer]
+                    • Reviewers test skincare products directly on skin patches. They check for reactions, rate the item's texture, and provide feedback to the laboratory team.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What is the primary focus of a Stage Costume Tailor?", opts: { A: "Writing scripts for theater plays", B: "Analyzing and improving stage costumes for live productions", C: "Testing skincare items under bright lamps", D: "Hacking into video game company databases" }, ans: "B", clue: "The text notes that stage tailors analyze clothing details and improve costumes for theater needs." },
+                        { id: 18, type: "mcq", q: "What must a Video Game Tester do when they discover a software bug?", opts: { A: "Keep it a secret from developers", B: "Report the product quality details directly back to the company", C: "Fix the core programming code themselves", D: "Sell the game online" }, ans: "B", clue: "The profile states testers are responsible for reporting every error back to the development company." },
+                        { id: 19, type: "mcq", q: "How do video game testers find hidden bugs?", opts: { A: "By thinking like a hacker to break the system", B: "By painting character costumes", C: "By rating skincare products", D: "By rewriting the whole game" }, ans: "A", clue: "The text notes they must think like a hacker to find system bugs." },
+                        { id: 20, type: "mcq", q: "What data does a Cosmetic Formulation Reviewer provide?", opts: { A: "Theater ticket price rates", B: "Game error reports", C: "A quality rating and feedback on skin products", D: "Tailoring measurements" }, ans: "C", clue: "The text states they check for skin reactions and give the product a rating." }
+                    ]
+                },
+                part2: {
+                    title: "Practical Strategies to Slow Down Your Eating",
+                    text: `Method 1: [Count Your Chewing]
+                    Many people eat too fast, swallowing their food quickly without thinking. Try setting a specific goal to chew every bite twenty times, counting each chew in your mind before swallowing.
+
+                    Method 2: [Smaller Tools]
+                    The size of your silverware matters. Try replacing large dinner forks with much smaller utensils, like a mini appetizer fork or a small dessert spoon, to limit your bite sizes.
+
+                    Method 3: [One by One]
+                    Never pick up your next forkful of food while you are still chewing. Put your utensils flat down on the table between every single bite to build a natural pause into your meal.
+
+                    Method 4: [Healthy Bites]
+                    Take regular sips of water between bites of food. This practice helps clear your palate, fills your stomach, and lets you naturally design a healthier pace for your diet.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "What bad habit does Method 1 aim to fix?", opts: { A: "Cooking food too long", B: "Using small dessert spoons", C: "Eating large meals too quickly and swallowing without chewing", D: "Drinking too much water" }, ans: "C", clue: "Method 1 targets people who eat too fast and swallow quickly without proper chewing." },
+                        { id: 24, type: "mcq", q: "What is the core strategy of the 'Count Your Chewing' method?", opts: { A: "Measuring the weight of your food plate", B: "Setting a number of times to chew and counting it mentally", C: "Eating meals only once a day", D: "Putting tools down on the table" }, ans: "B", clue: "The text advises setting a target to chew twenty times while counting in your mind." },
+                        { id: 25, type: "mcq", q: "How can someone easily limit their individual bite sizes?", opts: { A: "By using smaller utensils like mini forks or dessert spoons", B: "By eating fast food items", C: "By avoiding water during meals", D: "By counting to ten out loud" }, ans: "A", clue: "Method 2 notes that replacing large forks with smaller utensils naturally limits bite size." },
+                        { id: 26, type: "mcq", q: "What action does Method 3 suggest taking while chewing your food?", opts: { A: "Preparing the next bite immediately", B: "Washing your dinner plate", C: "Drinking a full glass of juice", D: "Putting your utensils flat down on the table" }, ans: "D", clue: "Method 3 advises putting your tools down on the table between bites." },
+                        { id: 27, type: "matrix", q: "Match the slowing-down strategy to its correct designated heading:", headings: ["Count Your Chewing", "Smaller Tools", "One by One", "Healthy Bites"], correctRowAnswers: ["Count Your Chewing", "Smaller Tools", "One by One", "Healthy Bites"], rows: ["Method 1", "Method 2", "Method 3", "Method 4"] }
+                    ]
+                },
+                part3: {
+                    title: "Eden's Legacy Donation Journey: A Personal Blog",
+                    text: `My family recently moved into a new apartment located right next to my school, allowing me to walk to class every morning. Because our new home is smaller, Dad told me on Sunday that I had to clear out my large collection of old board games. At first, I was angry and started protesting loudly, as these games reminded me of playing with my late grandfather.
+
+                    It took me another full day of thinking on Monday to realize that keeping them hidden in boxes was wasting them. On Tuesday morning, Dad and I carried the heavy boxes over to the local neighborhood community center.
+
+                    When we arrived, the staff welcomed us warmly. I sat down with the young children there and spent hours teaching them how to play the games. Seeing their excited faces made me feel incredibly happy. 
+
+                    Dad smiled, gave me a warm hug, and told me he was truly proud of my decision. It made me remember Grandpa's favorite saying: 'It is always better to share your joy with others.'`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "What is a major benefit of Eden's new family apartment?", opts: { A: "It has a massive storage room for games", B: "It is located next to his school, so he can walk there", C: "It features historic Thai architecture", D: "It was built by his grandfather" }, ans: "B", clue: "The text notes the new apartment is right next to his school, so he can walk to class." },
+                        { id: 30, type: "mcq", q: "How did Eden react when his father first asked him to clear out his games?", opts: { A: "He was happy to clean his room", B: "He felt very angry and started protesting loudly", C: "He packed them away immediately", D: "He offered to sell them online" }, ans: "B", clue: "The entry states he was initially angry and protested because the games held family memories." },
+                        { id: 31, type: "mcq", q: "On which day did Eden and his father visit the community center?", opts: { A: "Sunday", B: "Monday", C: "Tuesday", D: "Wednesday" }, ans: "C", clue: "Dad asked on Sunday; he thought about it on Monday; they went the next morning, which was Tuesday." },
+                        { id: 32, type: "mcq", q: "In paragraph 4, what does the word 'them' refer to?", opts: { A: "The community center staff", B: "The young children at the center", C: "The donated board games", D: "The school textbooks" }, ans: "B", clue: "Context shows 'them' refers back to the children Eden was joining and teaching." },
+                        { id: 33, type: "mcq", q: "How did Eden's father react to his son's actions at the center?", opts: { A: "He was disappointed by the delay", B: "He felt confused by the rules", C: "He smiled, hugged him, and said he was truly proud", D: "He left to go back to the apartment" }, ans: "C", clue: "The text explicitly states Dad smiled, hugged him, and expressed how proud he felt." },
+                        { id: 34, type: "mcq", q: "What is the most fitting title for Eden's blog entry?", opts: { A: "Grandpa's Biography", B: "The History of Board Games", C: "Sharing the Joy", D: "Moving to a New School" }, ans: "C", clue: "The entry concludes with Grandpa's message about sharing joy, which fits the theme of donation." },
+                        { id: 35, type: "gap", q: "Complete the summary memo sentences using words from the text passage:", inputs: [
+                            { label: "At the center, I joined the children and ", standard: "taught" },
+                            { label: "Grandpa always said it is better to ", standard: "share" }
+                        ]}
+                    ]
+                }
+            },
+            paper5: {
+                vocab: [
+                    { w: "flexible", d: "adj. Able to adjust readily to different conditions or schedules.", e: "These unique jobs offer highly flexible working hours." },
+                    { w: "distractions", d: "n. Things that prevent someone from giving their full attention to something.", e: "Turning off your smartphone removes major digital distractions." },
+                    { w: "appreciate", d: "v. To recognize the full value of something or someone.", e: "Donating old books helps you appreciate the true value of sharing." }
+                ],
+                part1: {
+                    title: "Unique Careers You Have Hidden Knowledge Of",
+                    text: `[Job 1: Pet Food Flavor Tester]
+                    • These quality control specialists assess the ingredients of premium pet food. Their job is to ensure the food tastes good and meets high quality standards before it goes to stores.
+
+                    [Job 2: Professional Cuddler]
+                    • These workers provide a comforting presence for clients dealing with stress. They listen closely to their problems, offer a supportive hug, and help them relax in a safe environment.
+
+                    [Job 3: Wedding Guest for Hire]
+                    • Some couples hire temporary actors to attend their celebrations. These hired guests fill empty seats, mingle with family members, and help make the wedding atmosphere feel much more fun and lively.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What is the main task of a Pet Food Flavor Tester?", opts: { A: "Training animals for television shows", B: "Designing labels for pet food cans", C: "Checking that pet food is made with high-quality ingredients and tastes right", D: "Diving into golf course ponds" }, ans: "C", clue: "The profile states they assess ingredients to check flavor profiles and ensure quality standards." },
+                        { id: 18, type: "mcq", q: "How do Professional Cuddlers support their clients?", opts: { A: "By cooking healthy meals", B: "By listening to their problems, comforting them, and offering a supportive hug", C: "By testing new skincare lotions", D: "By organizing wedding parties" }, ans: "B", clue: "The text states they listen to problems, comfort others, and provide hugs to help reduce stress." },
+                        { id: 19, type: "mcq", q: "Which task is NOT listed as part of a hired wedding guest's duties?", opts: { A: "Mingling with family members", B: "Filling empty seats at the venue", C: "Cleaning up the event venue afterward", D: "Making the party atmosphere livelier" }, ans: "C", clue: "Cleaning up the venue is never mentioned as part of their dynamic party-boosting tasks." },
+                        { id: 20, type: "mcq", q: "What do these three unique careers have in common?", opts: { A: "They require a university degree in engineering", B: "They offer flexible work structures centered on specific tasks", C: "They are performed completely outdoors in nature", D: "They pay no salary rewards" }, ans: "B", clue: "All descriptions emphasize non-traditional, flexible tasks centered on specific human or quality control needs." }
+                    ]
+                },
+                part2: {
+                    title: "Smart Techniques to Complete Your Tasks Faster",
+                    text: `Method 1: [Complete Your Work List]
+                    Feeling overwhelmed by too much work to do is a common issue. Write down your tasks on a clear checklist, order them by importance, and focus on finishing them one by one.
+
+                    Method 2: [Say No to Distractions]
+                    To maintain deep focus, you must remove interruptions. Turn off your smartphone notification sounds, close unrelated internet tabs, and tell others you need quiet time.
+
+                    Method 3: [Timer Technique]
+                    Try working in focused blocks using a basic timer. Set it for twenty-five minutes of uninterrupted work, followed by a short five-minute rest break to keep your mind fresh.
+
+                    Method 4: [Build a Good Habit]
+                    Keep your workspace clean and organized. Putting your books and tools back in their proper places saves time and helps you build strong self-discipline over time.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "According to Method 1, what causes common workplace stress?", opts: { A: "Having too much work to do at once", B: "Using a focused kitchen timer", C: "Cleaning up an office desk", D: "Talking to neighborhood friends" }, ans: "A", clue: "Method 1 identifies feeling overwhelmed by too much work to do as the main source of stress." },
+                        { id: 24, type: "mcq", q: "What is a great way to reward yourself for finishing a task?", opts: { A: "Adding more items to your list", B: "Giving yourself a small prize or break when a section is done", C: "Turning off your computer entirely", D: "Forgetting your checklist" }, ans: "B", clue: "The text suggests giving yourself a small reward or treat to stay motivated." },
+                        { id: 25, type: "mcq", q: "How can someone remove major digital distractions while working?", opts: { A: "By writing down a new checklist", B: "By turning off smartphone sounds and closing extra internet tabs", C: "By listening to loud music", D: "By buying a new desk" }, ans: "B", clue: "Method 2 notes that turning off phone sounds and closing extra tabs removes key interruptions." },
+                        { id: 26, type: "mcq", q: "What is the core idea behind the 'Timer Technique'?", opts: { A: "Working non-stop for hours without stopping", B: "Using a timer to balance focused work blocks with short rest breaks", C: "Clocking your total reading speed", D: "Waking up early in the morning" }, ans: "B", clue: "Method 3 balances twenty-five minutes of focused work with a five-minute rest period." },
+                        { id: 27, type: "matrix", q: "Match each time-saving strategy to its correct designated heading:", headings: ["Complete Your Work List", "Say No to Distractions", "Timer Technique", "Build a Good Habit"], correctRowAnswers: ["Complete Your Work List", "Say No to Distractions", "Timer Technique", "Build a Good Habit"], rows: ["Method 1", "Method 2", "Method 3", "Method 4"] }
+                    ]
+                },
+                part3: {
+                    title: "Jasmine's Comic Book Donation Project: An Online Blog",
+                    text: `My parents shared some exciting news on Monday: our family is expecting a baby brother! To make room, my dad told me we need to clear out our old study room so the baby can sleep there. He asked me to clear out my large collection of classic comic books. At first, my brother Bill and I didn't want to part with them, but after talking it over, we agreed with each other that it was the right thing to do.
+
+                    Three days later, on Thursday morning, Dad drove us to the local children's home to deliver the heavy boxes of comics. 
+
+                    The home director welcomed us warmly and thanked us. Seeing the children's faces change as they opened the boxes made me feel incredibly glad. They even handed us beautiful, handmade thank-you cards.
+
+                    On the drive home, I told Dad I wanted to donate more of my old storybooks next week. He smiled warmly and said he was genuinely glad to see us learn that sharing is caring.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "Why does Jasmine's family need to clear out the old study room?", opts: { A: "They are moving to a new apartment in the UK", B: "The room is being cleared so her new baby brother can sleep there", C: "The monthly home rent increased significantly", D: "They want to turn it into a painting classroom" }, ans: "B", clue: "The text explains the study room is being cleared out to make space for the new baby brother." },
+                        { id: 30, type: "mcq", q: "What does the phrase 'agreed with each other' mean in paragraph 1?", opts: { A: "They started arguing loudly", B: "They blamed each other for the mess", C: "They came to the same decision together", D: "They forgot the plan completely" }, ans: "C", clue: "The phrase indicates that after discussing the idea, they came to a mutual agreement." },
+                        { id: 31, type: "mcq", q: "On which day did Jasmine and her family visit the children's home?", opts: { A: "Monday", B: "Tuesday", C: "Wednesday", D: "Thursday" }, ans: "D", clue: "The news was shared on Monday, and they made the delivery three days later on Thursday morning." },
+                        { id: 32, type: "mcq", q: "In paragraph 4, what does the word 'them' refer to?", opts: { A: "The children's home staff", B: "Jasmine's donated comic books", C: "The handmade thank-you cards", D: "Her school friends" }, ans: "B", clue: "Context shows 'them' refers to the old comic books being given away." }
+                    ]
+                }
+            },
+            paper6: {
+                vocab: [
+                    { w: "talented", d: "adj. Having a natural ability or skill to do something well.", e: "Jim met a highly talented elderly man who played the banjo beautifully." },
+                    { w: "patrol", d: "v. To go around an area to check security conditions.", e: "Sharks often patrol reef borders searching for target fish groups." },
+                    { w: "investigating", d: "v. Carrying out a systematic inquiry to discover facts.", e: "Scientists are actively investigating the migratory habits of marine life." }
+                ],
+                part1: {
+                    title: "A Helpful Leaflet About Sharks",
+                    text: `Sharks are fascinating marine creatures that patrol the world's oceans. 
+                    • Dietary Habit: Most shark species hunt for fish, squid, and crabs along coral reef borders. Contrary to popular belief, humans are not on their natural menu.
+                    • Science Update: Marine researchers are investigating their smart hunting methods using underwater tracking tags.`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What do most shark species typically hunt for food?", opts: { A: "Large sea birds", B: "Fish, squid, and small crabs", C: "Insects along river banks", D: "Boats and fishing nets" }, ans: "B", clue: "The text states that most shark species hunt for fish, squid, and crabs." },
+                        { id: 18, type: "mcq", q: "How are marine researchers currently studying shark habits?", opts: { A: "By catching them in large nets", B: "By using specialized underwater tracking tags", C: "By feeding them in public aquariums", D: "By reading old history books" }, ans: "B", clue: "The leaflet notes scientists are investigating their habits using underwater tracking tags." }
+                    ]
+                },
+                part2: {
+                    title: "The Dynamic Operations of Electronic Stores",
+                    text: `Paragraph (i) [Product Delivery Checklists]
+                    When new electronic items arrive at a store, staff must check the delivery sheets. They verify model numbers against invoices to ensure all stock is present.
+
+                    Paragraph (ii) [The Customer Return Process]
+                    If a customer returns a faulty product, they must fill out a standard return form. The store requires details like the purchase date, receipt number, and a clear reason for the return.
+
+                    Paragraph (iii) [Repair and Support Services]
+                    Many stores offer on-site technical support. Tech teams inspect the broken device, find the issue, and decide whether to repair it or offer a store credit refund.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "What details must be included on a standard product return form?", opts: { A: "The store manager's address", B: "The purchase date, receipt number, and reason for return", C: "The store's delivery truck license plate", D: "The factory's creation history details" }, ans: "B", clue: "Paragraph (ii) specifies the required return form details, including purchase date and receipt number." },
+                        { id: 24, type: "matrix", q: "Match the retail store operation to its correct paragraph focus area:", headings: ["Stock Intake", "Customer Returns", "Technical Support"], correctRowAnswers: ["Stock Intake", "Customer Returns", "Technical Support"], rows: ["Paragraph (i)", "Paragraph (ii)", "Paragraph (iii)"] }
+                    ]
+                },
+                part3: {
+                    title: "Jim's Volunteer Service Trip to Indonesia: A Diary Entry",
+                    text: `Last month, I joined a week-long volunteer service trip to an elderly nursing home in Indonesia. On our first day, we performed a short musical play for the residents. I was so nervous that I had a really hard time remembering my spoken lines on stage.
+
+                    However, the warm smiles from the elderly residents helped me feel much better. After the play, I met an elderly man named Bayu. He was incredibly talented and showed us how to make simple musical instruments using recycled wood and strings.
+
+                    Together, we built a simple banjo. Bayu then surprised everyone by playing a beautiful traditional song on it. His singing voice was clear and lovely, and I loved listening to him perform.
+
+                    Leaving the home at the end of the trip was difficult. I promised to write regularly, and I spent my last evening writing postcards to share my wonderful experience with my family back home.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "What challenge did Jim face during the first day of his service trip?", opts: { A: "He lost his travel luggage", B: "He had a hard time remembering his spoken lines on stage", C: "He couldn't find the nursing home location", D: "He didn't know how to speak English" }, ans: "B", clue: "The text states Jim was nervous and had a hard time remembering his spoken lines during the play." },
+                        { id: 30, type: "mcq", q: "What activity did Jim and Bayu do together?", opts: { A: "They painted the nursing home walls", B: "They built a simple banjo using recycled wood and strings", C: "They cooked a traditional Indonesian dinner", D: "They went on a boat trip along the river" }, ans: "B", clue: "The diary notes they worked together to build a simple banjo out of recycled wood." },
+                        { id: 31, type: "mcq", q: "What did Jim do on his final evening in Indonesia?", opts: { A: "He practiced his stage lines again", B: "He wrote postcards to share his experiences with his family", C: "He bought expensive gifts at the mall", D: "He built another instrument" }, ans: "B", clue: "The text notes he spent his last evening writing postcards to his family back home." },
+                        { id: 32, type: "matrix", q: "Put Jim's service trip events into the correct sequential order:", headings: ["Step A", "Step B", "Step C", "Step D"], correctRowAnswers: ["Step B", "Step A", "Step C", "Step D"], rows: ["Jim felt nervous during the opening musical play.", "Jim signed up for the international service trip package.", "Jim and Bayu built a functional banjo together.", "Jim wrote postcards to his cousin Ashley."] }
+                    ]
+                }
+            },
+            paper7: {
+                vocab: [
+                    { w: "famous", d: "adj. Widely known and recognized by many people.", e: "The oceanfront theme park is famous for its thrilling roller coasters." },
+                    { w: "childlike", d: "adj. Having good qualities associated with a child, like innocence and joy.", e: "Aunt Sally showed her childlike side by laughing and screaming on the fast rides." },
+                    { w: "costumed", d: "adj. Wearing a specialized set of clothes to look like a character.", e: "They took colorful photos alongside costumed theme park characters." }
+                ],
+                part1: {
+                    title: "The Ocean Breeze Theme Park Leaflet",
+                    text: `Welcome to Ocean Breeze Theme Park, the ultimate family fun destination!
+                    • Main Highlight: Our park is famous for its high-speed roller coasters and interactive carnival games.
+                    • Special Offer: Present this original printed leaflet at any park kiosk to receive a free souvenir photo print.
+                    • Meet the Stars: Don't miss the chance to take photos with our costumed park characters along the main avenue every afternoon!`,
+                    questions: [
+                        { id: 17, type: "mcq", q: "What is Ocean Breeze Theme Park famous for?", opts: { A: "Its historical pottery kilns", B: "High-speed roller coasters and interactive carnival games", C: "Its quiet libraries", D: "Deep-sea shark tracking research" }, ans: "B", clue: "The leaflet states the park is famous for its high-speed roller coasters and carnival games." },
+                        { id: 18, type: "mcq", q: "How can a park visitor get a free souvenir photo print?", opts: { A: "By winning a roller coaster race", B: "By presenting the original printed leaflet at a kiosk", C: "By arriving before 8:00 AM", D: "By wearing a custom costume" }, ans: "B", clue: "The text notes that presenting the printed leaflet at a kiosk rewards guests with a free print." }
+                    ]
+                },
+                part2: {
+                    title: "The Value of Multigenerational Family Outings",
+                    text: `Paragraph (i) [Strengthening Family Connections]
+                    Spending weekend time together helps different generations connect. Sharing fun activities allows grandparents, parents, and children to build closer relationships.
+
+                    Paragraph (ii) [Discovering New Perspectives]
+                    Outings often show us new sides of our family members. Seeing an older relative laugh and enjoy exciting rides reminds us that adults still have a fun, youthful side.
+
+                    Paragraph (iii) [Creating Lasting Memories]
+                    Taking photos together during these trips captures happy family moments. These photos become treasured keepsakes that families look back on for years.`,
+                    questions: [
+                        { id: 23, type: "mcq", q: "What is a main benefit of multigenerational family outings?", opts: { A: "They cut down on weekly grocery costs", B: "They help different generations connect and build closer relationships", C: "They give students extra exam study time", D: "They help people find remote mountain outposts" }, ans: "B", clue: "Paragraph (i) points out that spending time together helps family generations build closer bonds." },
+                        { id: 24, type: "matrix", q: "Match the family value theme to its correct paragraph focus:", headings: ["Connection Focus", "New Sides Focus", "Memory Focus"], correctRowAnswers: ["Connection Focus", "New Sides Focus", "Memory Focus"], rows: ["Paragraph (i)", "Paragraph (ii)", "Paragraph (iii)"] }
+                    ]
+                },
+                part3: {
+                    title: "Ben's Unforgettable Day Out with Aunt Sally: A Personal Blog",
+                    text: `Yesterday was an amazing day because my Aunt Sally, who lives in Canada, came back to Hong Kong for a surprise visit. Since she had free admission tickets, she invited me to spend the day at the city's famous theme park. I was so excited because I had never been there before.
+
+                    When we arrived, the entrance was busy and colorful. Aunt Sally immediately showed her childlike side by running toward the biggest rides, laughing and screaming loudly as we went on the roller coasters. I had never seen her feel so free and full of energy!
+
+                    We spent hours trying out different rides and playing fun stall games. Aunt Sally was quite lucky and won two large plush toys for us. 
+
+                    Before leaving, we took a great photo with the costumed park characters. That photo is my absolute favorite memory from our day out, and it made our theme park trip truly unforgettable.`,
+                    questions: [
+                        { id: 29, type: "mcq", q: "Why did Ben and Aunt Sally go to the theme park?", opts: { A: "They went to study marine life habits", B: "Aunt Sally had free admission tickets and invited him", C: "They were looking for a quiet place to read", D: "Ben wanted to practice his photography skills" }, ans: "B", clue: "The text notes Aunt Sally had free admission tickets and invited Ben along for the visit." },
+                        { id: 30, type: "mcq", q: "How did Aunt Sally show her 'childlike side' at the park?", opts: { A: "By buying expensive souvenirs", B: "By running toward the biggest rides while laughing and screaming loudly", C: "By resting quietly on a bench", D: "By complaining about the long lines" }, ans: "B", clue: "The text states she showed her childlike side by running to the big rides, laughing and screaming with joy." },
+                        { id: 31, type: "mcq", q: "Which souvenir item did Aunt Sally win at the stall games?", opts: { A: "A printed photo booklet", B: "Two large plush toys", C: "A traditional stringed banjo", D: "A purple clay teapot" }, ans: "B", clue: "The blog entry notes she was lucky at the stall games and won two large plush toys." },
+                        { id: 32, type: "matrix", q: "Arrange Ben's holiday blog events in the correct chronological order:", headings: ["Phase A", "Phase B", "Phase C", "Phase D"], correctRowAnswers: ["Phase B", "Phase A", "Phase C", "Phase D"], rows: ["Ben and Aunt Sally rode the big roller coasters together.", "Aunt Sally arrived back in Hong Kong from Canada.", "Aunt Sally won plush toys at the stall games.", "They took a memorable photo with costumed characters."] }
+                    ]
+                }
+            }
+        };
+
+        let currentPaperId = "paper1";
+        let activePart = 1;
+        let runningScore = 0;
+        const trackedAnswers = {};
+
+        function loadPaper(paperId) {
+            currentPaperId = paperId;
+            activePart = 1;
+            
+            // Re-render sub-components
+            renderPartTabs();
+            renderContent();
+            renderVocab();
+        }
+
+        function renderPartTabs() {
+            const paperData = mockDatabase[currentPaperId];
+            const p1Btn = document.getElementById("tab-p1");
+            const p2Btn = document.getElementById("tab-p2");
+            const p3Btn = document.getElementById("tab-p3");
+
+            p1Btn.style.display = paperData.part1 ? "block" : "none";
+            p2Btn.style.display = paperData.part2 ? "block" : "none";
+            p3Btn.style.display = paperData.part3 ? "block" : "none";
+
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.getElementById(`tab-p${activePart}`).classList.add("active");
+        }
+
+        function switchPart(partNum) {
+            activePart = partNum;
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.getElementById(`tab-p${activePart}`).classList.add("active");
+            renderContent();
+        }
+
+        function renderContent() {
+            const paperData = mockDatabase[currentPaperId];
+            const partKey = `part${activePart}`;
+            const data = paperData[partKey];
+
+            const textTarget = document.getElementById("text-content");
+            const qTarget = document.getElementById("questions-content");
+
+            if (!data) {
+                textTarget.innerHTML = "<p>No reading passage details found for this selection.</p>";
+                qTarget.innerHTML = "";
+                return;
+            }
+
+            // Render reading text side panel
+            textTarget.innerHTML = `
+                <h2>${data.title}</h2>
+                <div class="text-passage">${data.text}</div>
+            `;
+
+            // Render matching assessment arrays side panel
+            qTarget.innerHTML = "";
+            data.questions.forEach((q, idx) => {
+                const block = document.createElement("div");
+                block.className = "question-block";
+                
+                if (q.type === "mcq") {
+                    block.innerHTML = `
+                        <div class="q-header">Question ${q.id} (Multiple Choice)</div>
+                        <div class="q-text">${q.q}</div>
+                        <div class="options-list">
+                            ${Object.entries(q.opts).map(([letter, val]) => `
+                                <button class="option-item" 
+                                        id="opt-${q.id}-${letter}" 
+                                        onclick="evaluateMCQ(${q.id}, '${letter}', '${q.ans}', '${btoa(q.clue)}')">
+                                    <span class="option-letter">${letter}</span>
+                                    <span>${val}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="feedback-box" id="feedback-${q.id}"></div>
+                    `;
+                } else if (q.type === "gap") {
+                    block.innerHTML = `
+                        <div class="q-header">Question ${q.id} (Text Input Fit Matrices)</div>
+                        <div class="q-text">${q.q}</div>
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            ${q.inputs.map((inp, iIndex) => `
+                                <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+                                    <span style="font-size:0.95rem; font-weight:500;">${inp.label}</span>
+                                    <input type="text" class="input-blank" id="gap-${q.id}-${iIndex}" placeholder="..." autocomplete="off" />
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="action-footer">
+                            <button class="validate-btn" onclick="evaluateGaps(${q.id}, ${idx})">Verify Answers</button>
+                        </div>
+                        <div class="feedback-box" id="feedback-${q.id}"></div>
+                    `;
+                } else if (q.type === "matrix") {
+                    block.innerHTML = `
+                        <div class="q-header">Question ${q.id} (Heading & Chronological Matrix)</div>
+                        <div class="q-text">${q.q}</div>
+                        <div style="overflow-x:auto;">
+                            <table class="matrix-table">
+                               <thead>
+                                   <tr>
+                                       <th>Assessment Items</th>
+                                       ${q.headings.map(h => `<th>${h}</th>`).join('')}
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   ${q.rows.map((rowText, rowIndex) => `
+                                       <tr>
+                                           <td style="font-weight:500;">${rowText}</td>
+                                           ${q.headings.map((h, hIndex) => `
+                                               <td>
+                                                   <input type="radio" class="matrix-radio" name="matrix-${q.id}-${rowIndex}" id="matrix-${q.id}-${rowIndex}-${hIndex}" value="${h}" />
+                                               </td>
+                                           `).join('')}
+                                       </tr>
+                                   `).join('')}
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="action-footer">
+                            <button class="validate-btn" onclick="evaluateMatrix(${q.id}, ${idx})">Verify Sequence</button>
+                        </div>
+                        <div class="feedback-box" id="feedback-${q.id}"></div>
+                    `;
+                }
+
+                qTarget.appendChild(block);
+            });
+
+            // Restore visual state markers if user answers exist
+            restoreSessionState();
+        }
+
+        function evaluateMCQ(qId, selectedLetter, correctLetter, base64Clue) {
+            const uniqueKey = `${currentPaperId}-p${activePart}-${qId}`;
+            if (trackedAnswers[uniqueKey]) return; // Lock choices to prevent re-clicks
+
+            trackedAnswers[uniqueKey] = { selected: selectedLetter, correct: correctLetter };
+            const clueText = atob(base64Clue);
+            
+            const feedbackEl = document.getElementById(`feedback-${qId}`);
+            
+            // Disable option selection loops
+            const letters = ["A", "B", "C", "D"];
+            letters.forEach(l => {
+                const btn = document.getElementById(`opt-${qId}-${l}`);
+                if (btn) btn.disabled = true;
+            });
+
+            const chosenBtn = document.getElementById(`opt-${qId}-${selectedLetter}`);
+            const correctBtn = document.getElementById(`opt-${qId}-${correctLetter}`);
+
+            if (selectedLetter === correctLetter) {
+                chosenBtn.classList.add("selected-correct");
+                feedbackEl.innerHTML = `<strong>✓ Correct Answer Selected:</strong> Option ${correctLetter}. <br/> ${clueText}`;
+                feedbackEl.className = "feedback-box show correct-style";
+                updateScore(2);
+            } else {
+                chosenBtn.classList.add("selected-incorrect");
+                if (correctBtn) correctBtn.classList.add("selected-correct");
+                feedbackEl.innerHTML = `<strong>✗ Incorrect Selection:</strong> You selected Option ${selectedLetter}. Correct answer is Option ${correctLetter}. <br/> ${clueText}`;
+                feedbackEl.className = "feedback-box show incorrect-style";
+            }
+        }
+
+        function evaluateGaps(qId, questionIndex) {
+            const uniqueKey = `${currentPaperId}-p${activePart}-${qId}`;
+            if (trackedAnswers[uniqueKey]) return;
+
+            const paperData = mockDatabase[currentPaperId];
+            const partKey = `part${activePart}`;
+            const qData = paperData[partKey].questions[questionIndex];
+            
+            let allCorrect = true;
+            const userInputs = [];
+
+            qData.inputs.forEach((inp, idx) => {
+                const inputEl = document.getElementById(`gap-${qId}-${idx}`);
+                const userVal = inputEl.value.trim().toLowerCase();
+                const standardVal = inp.standard.toLowerCase();
+
+                userInputs.push(inputEl.value);
+                inputEl.disabled = true;
+
+                if (userVal === standardVal) {
+                    inputEl.classList.add("inline-correct");
+                } else {
+                    inputEl.classList.add("inline-incorrect");
+                    allCorrect = false;
+                }
+            });
+
+            trackedAnswers[uniqueKey] = { inputs: userInputs, isCorrect: allCorrect };
+            const feedbackEl = document.getElementById(`feedback-${qId}`);
+
+            if (allCorrect) {
+                feedbackEl.innerHTML = `<strong>✓ Perfect Match:</strong> Key terms accurately cross-referenced from context materials.`;
+                feedbackEl.className = "feedback-box show correct-style";
+                updateScore(2);
+            } else {
+                const answersList = qData.inputs.map(inp => inp.standard).join(", ");
+                feedbackEl.innerHTML = `<strong>✗ Gap Divergence Detects:</strong> Review vocabulary profiles. Expected answers: [ ${answersList} ]`;
+                feedbackEl.className = "feedback-box show incorrect-style";
+            }
+        }
+
+        function evaluateMatrix(qId, questionIndex) {
+            const uniqueKey = `${currentPaperId}-p${activePart}-${qId}`;
+            if (trackedAnswers[uniqueKey]) return;
+
+            const paperData = mockDatabase[currentPaperId];
+            const partKey = `part${activePart}`;
+            const qData = paperData[partKey].questions[questionIndex];
+
+            let matrixCorrect = true;
+            const userSelections = [];
+
+            qData.rows.forEach((row, rowIndex) => {
+                const radios = document.getElementsByName(`matrix-${qId}-${rowIndex}`);
+                let chosenVal = "";
+                
+                radios.forEach(r => {
+                    r.disabled = true;
+                    if (r.checked) chosenVal = r.value;
+                });
+
+                userSelections.push(chosenVal);
+                const targetCorrectVal = qData.correctRowAnswers[rowIndex];
+
+                if (chosenVal !== targetCorrectVal) {
+                    matrixCorrect = false;
+                }
+            });
+
+            trackedAnswers[uniqueKey] = { selections: userSelections, isCorrect: matrixCorrect };
+            const feedbackEl = document.getElementById(`feedback-${qId}`);
+
+            if (matrixCorrect) {
+                feedbackEl.innerHTML = `<strong>✓ Alignment Match:</strong> Chronological order matching logic validated successfully.`;
+                feedbackEl.className = "feedback-box show correct-style";
+                updateScore(4);
+            } else {
+                let keyPathText = qData.rows.map((r, i) => `<br/>• ${r} ➜ <strong>${qData.correctRowAnswers[i]}</strong>`).join('');
+                feedbackEl.innerHTML = `<strong>✗ Sequence Error:</strong> The correct pattern order should be: ${keyPathText}`;
+                feedbackEl.className = "feedback-box show incorrect-style";
+            }
+        }
+
+        function restoreSessionState() {
+            const paperData = mockDatabase[currentPaperId];
+            const partKey = `part${activePart}`;
+            const data = paperData[partKey];
+            if (!data) return;
+
+            data.questions.forEach((q, idx) => {
+                const uniqueKey = `${currentPaperId}-p${activePart}-${q.id}`;
+                const record = trackedAnswers[uniqueKey];
+                if (!record) return;
+
+                const feedbackEl = document.getElementById(`feedback-${q.id}`);
+
+                if (q.type === "mcq") {
+                    const letters = ["A", "B", "C", "D"];
+                    letters.forEach(l => {
+                        const btn = document.getElementById(`opt-${q.id}-${l}`);
+                        if (btn) btn.disabled = true;
+                    });
+                    const chosenBtn = document.getElementById(`opt-${q.id}-${record.selected}`);
+                    const correctBtn = document.getElementById(`opt-${q.id}-${record.correct}`);
+
+                    if (record.selected === record.correct) {
+                        if (chosenBtn) chosenBtn.classList.add("selected-correct");
+                        feedbackEl.innerHTML = `<strong>✓ Correct Answer:</strong> Option ${record.correct}.`;
+                        feedbackEl.className = "feedback-box show correct-style";
+                    } else {
+                        if (chosenBtn) chosenBtn.classList.add("selected-incorrect");
+                        if (correctBtn) correctBtn.classList.add("selected-correct");
+                        feedbackEl.innerHTML = `<strong>✗ Incorrect Option:</strong> Correct baseline was Option ${record.correct}.`;
+                        feedbackEl.className = "feedback-box show incorrect-style";
+                    }
+                } else if (q.type === "gap") {
+                    q.inputs.forEach((inp, iIdx) => {
+                        const inputEl = document.getElementById(`gap-${q.id}-${iIdx}`);
+                        inputEl.value = record.inputs[iIdx] || "";
+                        inputEl.disabled = true;
+                        if (inputEl.value.trim().toLowerCase() === inp.standard.toLowerCase()) {
+                            inputEl.classList.add("inline-correct");
+                        } else {
+                            inputEl.classList.add("inline-incorrect");
+                        }
+                    });
+                    feedbackEl.innerHTML = record.isCorrect ? "<strong>✓ Answer saved.</strong>" : "<strong>✗ Incomplete or contains errors.</strong>";
+                    feedbackEl.className = record.isCorrect ? "feedback-box show correct-style" : "feedback-box show incorrect-style";
+                } else if (q.type === "matrix") {
+                    q.rows.forEach((row, rIdx) => {
+                        const radios = document.getElementsByName(`matrix-${q.id}-${rIdx}`);
+                        const userSavedVal = record.selections[rIdx];
+                        radios.forEach(r => {
+                            r.disabled = true;
+                            if (r.value === userSavedVal) r.checked = true;
+                        });
+                    });
+                    feedbackEl.innerHTML = record.isCorrect ? "<strong>✓ Verified Alignment.</strong>" : "<strong>✗ Alignment parameters incorrect.</strong>";
+                    feedbackEl.className = record.isCorrect ? "feedback-box show correct-style" : "feedback-box show incorrect-style";
+                }
+            });
+        }
+
+        function renderVocab() {
+            const target = document.getElementById("vocab-list-target");
+            const items = mockDatabase[currentPaperId].vocab || [];
+            
+            if (items.length === 0) {
+                target.innerHTML = "<p style='color:#64748b;'>No target theme words listed for this paper.</p>";
+                return;
+            }
+
+            target.innerHTML = items.map(v => `
+                <div class="vocab-item">
+                    <div class="vocab-word">${v.w}</div>
+                    <div class="vocab-def">${v.d}</div>
+                    <div class="vocab-ex">${v.e}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateScore(points) {
+            runningScore += points;
+            document.getElementById("score-counter").innerText = runningScore;
+        }
+
+        function toggleVocab() {
+            document.getElementById("vocab-sidebar").classList.toggle("open");
+        }
+
+        // Initialize portal on application load
+        loadPaper("paper1");
+    </script>
+</body>
+</html>
