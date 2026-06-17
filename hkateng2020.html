@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKAT Pre-Secondary 1 English - Section B Reading Test</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f8f9fa;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #333;
+            --border-color: #ccc;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            background-color: #fff;
+            padding: 10px 0;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            margin: 2px 0;
+            font-size: 20px;
+        }
+
+        .header h2 {
+            margin: 2px 0;
+            font-size: 16px;
+            color: #555;
+        }
+
+        /* Tabs System */
+        .tabs-container {
+            display: flex;
+            background-color: #343a40;
+            padding: 5px 10px 0 10px;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            color: #ccc;
+            background-color: #495057;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            margin-right: 4px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background-color: #fff;
+            color: var(--primary-color);
+            border-bottom: 2px solid #fff;
+        }
+
+        /* Split Layout Design */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .tab-panel {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        /* Landing/Contents Page Styling */
+        .contents-page {
+            width: 100%;
+            padding: 40px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contents-card {
+            max-width: 650px;
+            width: 100%;
+            background: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .contents-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #222;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .contents-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .contents-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .contents-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-color);
+        }
+
+        .contents-item-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .contents-item-meta {
+            font-size: 14px;
+            color: #666;
+            background: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        /* Left Side: Reading Text Box */
+        .left-pane {
+            width: 50%;
+            padding: 25px;
+            overflow-y: auto;
+            border-right: 2px solid var(--border-color);
+            background-color: var(--secondary-color);
+            box-sizing: border-box;
+        }
+
+        /* Right Side: Questions Layout Box */
+        .right-pane {
+            width: 50%;
+            padding: 25px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+
+        .instructions {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 20px;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .passage-title {
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #111;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+
+        .grid-stalls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stall {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stall-title {
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        /* Question Layout Blocks */
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .options-list li {
+            margin-bottom: 8px;
+        }
+
+        .options-list label {
+            display: block;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-list label:hover {
+            background-color: #edf2f7;
+        }
+
+        .options-list input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .blank-input {
+            width: 130px;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .seq-input {
+            width: 50px;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .explanation {
+            margin-top: 12px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: none;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .explanation.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .explanation.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .footer-controls {
+            padding: 15px 25px;
+            background: #f1f3f5;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .btn-submit {
+            padding: 12px 30px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        #score-summary {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+
+        .score-good { background-color: #d4edda; color: #155724; }
+        .score-bad { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>HONG KONG ATTAINMENT TEST</h2>
+    <h1>English Language (Pre-Secondary One) - Section B Reading</h1>
+</div>
+
+<div class="tabs-container">
+    <button class="tab-btn active" id="btn-contents" onclick="switchTab(event, 'contents')">Table of Contents</button>
+    <button class="tab-btn" id="btn-part1" onclick="switchTab(event, 'part1')">Part 1 (Q17-22)</button>
+    <button class="tab-btn" id="btn-part2" onclick="switchTab(event, 'part2')">Part 2 (Q23-28)</button>
+    <button class="tab-btn" id="btn-part3" onclick="switchTab(event, 'part3')">Part 3 (Q29-35)</button>
+</div>
+
+<div class="main-content">
+    
+    <!-- ================= CONTENTS PAGE PANEL ================= -->
+    <div id="contents" class="tab-panel active">
+        <div class="contents-page">
+            <div class="contents-card">
+                <div class="contents-title">Test Contents</div>
+                <p style="text-align: center; color: #666; margin-bottom: 25px;">Select a section below to read the passage and begin answering the questions.</p>
+                
+                <ul class="contents-list">
+                    <li class="contents-item" onclick="document.getElementById('btn-part1').click();">
+                        <span class="contents-item-title">Part 1: Leaflet — Savour Hong Kong</span>
+                        <span class="contents-item-meta">Questions 17 - 22</span>
+                    </li>
+                    <li class="contents-item" onclick="document.getElementById('btn-part2').click();">
+                        <span class="contents-item-title">Part 2: Article — How to Be a Good Speaker</span>
+                        <span class="contents-item-meta">Questions 23 - 28</span>
+                    </li>
+                    <li class="contents-item" onclick="document.getElementById('btn-part3').click();">
+                        <span class="contents-item-title">Part 3: Narrative — An Afternoon at the Community Centre</span>
+                        <span class="contents-item-meta">Questions 29 - 35</span>
+                    </li>
+                </ul>
+
+                <p style="font-size: 13px; color: #888; text-align: center; margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                    Based on Section B of HKAT Eng Pre-S1 2000.pdf. Use the tabs above to switch components freely.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PART 1 PANEL ================= -->
+    <div id="part1" class="tab-panel">
+        <div class="left-pane">
+            <div class="passage-title">Savour Hong Kong</div>
+            <p>If you are reading this, you might be planning a trip to Hong Kong[cite: 1]. One thing not to be missed is the Hong Kong Tourism Board's annual event, Savour Hong Kong[cite: 1]. It has attracted more than 5 million local and overseas visitors over the past 20 years, and is a 'must-go-to' winter event[cite: 1]. This year, we aim to provide our visitors with the most extraordinary flavours from all around the world[cite: 1].</p>
+            <p>Visit our webpage (http://savourhk.lovehk.com) for the latest news and events[cite: 1].</p>
+            <p>
+                <strong>Date:</strong> 15<sup>th</sup> - 30<sup>th</sup> December, 2020[cite: 1]<br>
+                <strong>Time:</strong> 10:30 a.m. - 8:00 p.m.[cite: 1]<br>
+                <strong>Venue:</strong> Central Harbourfront Event Space[cite: 1]<br>
+                <strong>Admission Fee:</strong> $20 per person (free for children aged 3 or below and seniors aged 65 or above)[cite: 1]
+            </p>
+
+            <div class="grid-stalls">
+                <div class="stall">
+                    <div class="stall-title">Natural Drinker (Stall: M06)</div>
+                    <p>For thousands of years, herbal tea has been popular with Chinese people who dislike going to see the doctor and taking pills[cite: 1]. Many believe that regularly drinking herbal tea can prevent them from getting sick[cite: 1]. Although most of the teas are black, not all of them are bitter[cite: 1]. Come and experience the magic of Chinese plants and fruit yourself![cite: 1]</p>
+                </div>
+                <div class="stall">
+                    <div class="stall-title">Pearl of the Orient (Stall: F30)</div>
+                    <p>Hongkongers, and people from all over the world, line up to try our local snacks[cite: 1]. Excite your taste buds with our famous fresh pineapple buns and egg tarts[cite: 1]. Everything is baked on-the-spot![cite: 1] Feeling sleepy after your long flight? Try our 'yuen yeung' a famous local drink made by mixing milk tea with coffee![cite: 1] You will surely feel energised![cite: 1]</p>
+                </div>
+                <div class="stall">
+                    <div class="stall-title">Neo-Canton (Stall: G19)</div>
+                    <p>Let our American-born Chinese chef change how you feel about dim sum[cite: 1]. Try our famous piggy-shaped barbecue pork buns, shrimp dumplings made with tomato-flavoured wrappers and chicken feet in lemonade[cite: 1]. We bring the best of the East and West together for you to taste[cite: 1]. How can you say 'no' to high-quality food at low prices?[cite: 1]</p>
+                </div>
+                <div class="stall">
+                    <div class="stall-title">Hiss Hiss (Stall: K22)</div>
+                    <p>Are you afraid of snakes? What if they are cooked?[cite: 1] Seasonal snake soup was one of the favourite dishes of ancient Chinese emperors on cold, icy days[cite: 1]. Nowadays, it is very famous among Hongkongers, but some still find it strange[cite: 1]. Its main ingredients are fresh snake meat, chicken, ginger and mushrooms[cite: 1]. You will be surprised how drinking snake soup can warm you up in minutes![cite: 1]</p>
+                </div>
+            </div>
+        </div>
+        <div class="right-pane">
+            <div class="instructions">Tom is reading a leaflet. Read it carefully, choose the best answers for Questions 17-21 and complete Question 22[cite: 1].</div>
+            
+            <div class="question-block">
+                <div class="question-text">17. Savour Hong Kong ______[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q17" value="A"> A. is free for all children[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q17" value="B"> B. has been a successful event[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q17" value="C"> C. is organised for overseas visitors only[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q17" value="D"> D. attracts over 5 million visitors every year.[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q17"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">18. According to Natural Drinker, why is herbal tea popular?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q18" value="A"> A. It can replace doctors.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q18" value="B"> B. It is not as bitter as pills.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q18" value="C"> C. It can keep people healthy.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q18" value="D"> D. It is made with plants and fruit.[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q18"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">19. Which is TRUE about the Pearl of the Orient?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q19" value="A"> A. The snacks are freshly baked.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q19" value="B"> B. The stall only sells food to tourists.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q19" value="C"> C. Their milk tea and coffee are special.[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q19" value="D"> D. Their food helps with sleeping problems.[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q19"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">20. Tom likes to try new food from around the world. Which stall should he visit?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q20" value="A"> A. F30[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q20" value="B"> B. G19[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q20" value="C"> C. K22[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q20" value="D"> D. M06[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q20"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">21. What is the theme of the leaflet?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q21" value="A"> A. Food and Travel[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q21" value="B"> B. Food and Health[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q21" value="C"> C. History and Travel[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q21" value="D"> D. Health and History[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q21"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">22. Tom is writing a message to his friend, Sam. Read the leaflet on P.2 and help him complete the sentences. Use only ONE word for each blank. Make sure your answers are grammatically correct.[cite: 1]</div>
+                <p style="background: #fdfdfd; padding: 10px; border: 1px dashed var(--border-color); font-size: 15px;">
+                    Let's go to Savour Hong Kong together during the Christmas holiday. You should try the snake soup. Today, it is very 
+                    (i) <input type="text" id="q22_1" class="blank-input"> in Hong Kong, but some people don't like it. It's perfect for winter because it can keep you 
+                    (ii) <input type="text" id="q22_2" class="blank-input"> on cold days...[cite: 1]
+                </p>
+                <div class="explanation" id="exp-q22_1"></div>
+                <div class="explanation" id="exp-q22_2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PART 2 PANEL ================= -->
+    <div id="part2" class="tab-panel">
+        <div class="left-pane">
+            <div class="passage-title">How to Be a Good Speaker</div>
+            <p>If the thought of speaking in front of the class gives you cold sweats, you are not alone[cite: 1]. Learning certain speaking skills can help you gain confidence and make an impressive presentation[cite: 1]. Here are some tips for you[cite: 1].</p>
+            <p><strong>(i)</strong> Everyone knows the importance of having interesting ideas in a presentation[cite: 1]. However, there are other essential things[cite: 1]. According to Roy M. Berko, an expert in communication, only 7% of the meaning comes from the words used[cite: 1]. 93% of the meaning of what people say comes from non-verbal signals, such as facial expressions and body language[cite: 1]. How to use your voice is also important[cite: 1]. The emotions in your voice have to match what you are saying[cite: 1]. An appropriate tone and style should also be used during your presentation[cite: 1].</p>
+            <p><strong>(ii)</strong> While giving a presentation, most speakers find it difficult to control their speed, especially when they are nervous[cite: 1]. You may think that speaking rapidly like lightning would help you relax[cite: 1]. However, it does not help you give a good presentation[cite: 1]. When you deliver a speech in a rush, it is hard for the audience to follow, and they might get tired of listening to you[cite: 1]. Why not slow down to let your words be heard more clearly and to be better understood?[cite: 1]</p>
+            <p><strong>(iii)</strong> You should also pay extra attention to how you break down a sentence into parts by taking pauses whenever needed[cite: 1]. For example, when you say 'Let's eat, Grandpa', you have to pause after 'eat' so that the sentence sounds like a friendly invitation[cite: 1]. Otherwise, people may think that you are asking others to 'eat Grandpa' with you![cite: 1] Pausing correctly can save you from an embarrassing situation[cite: 1].</p>
+            <p><strong>(iv)</strong> To conclude, your non-verbal signals, tone, speed and pauses all contribute to how well your audience understands your presentation[cite: 1]. Practise more and you will be able to give an impressive presentation confidently next time![cite: 1]</p>
+        </div>
+        <div class="right-pane">
+            <div class="instructions">Tom is reading an article about giving a presentation. Read it carefully, choose the best answers for Questions 23-27 and complete Question 28[cite: 1].</div>
+            
+            <div class="question-block">
+                <div class="question-text">23. In paragraph (i), what does 'other essential things' refer to?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q23" value="A"> A. matching words with meanings[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q23" value="B"> B. interesting ideas for presentation[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q23" value="C"> C. advice from communication experts[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q23" value="D"> D. body language and delivery skills[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q23"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">24. According to paragraph (ii), speaking very fast makes the audience feel ______[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q24" value="A"> A. tired[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q24" value="B"> B. relaxed[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q24" value="C"> C. excited[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q24" value="D"> D. nervous[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q24"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">25. Why does the writer use the example 'Let's eat, Grandpa'?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q25" value="A"> A. to show how to invite a person politely[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q25" value="B"> B. to point out the importance of pauses[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q25" value="C"> C. to tell a funny story about a family[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q25" value="D"> D. to give tips on handling an embarrassing situation[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q25"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">26. Which sub-heading is best for paragraph (ii)?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q26" value="A"> A. Take a break[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q26" value="B"> B. Watch your speed[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q26" value="C"> C. Think of interesting ideas[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q26" value="D"> D. Use non-verbal signals[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q26"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">27. What is the main purpose of this article?[cite: 1]</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q27" value="A"> A. to reduce public speaking fears[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q27" value="B"> B. to give advice on presentation skills[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q27" value="C"> C. to report on studies about communication[cite: 1]</label></li>
+                    <li><label><input type="radio" name="q27" value="D"> D. to explain how to share interesting ideas[cite: 1]</label></li>
+                </ul>
+                <div class="explanation" id="exp-q27"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">28. Tom is taking notes for his English class. Complete his notes using words from the article. Use only ONE word for each blank.[cite: 1]</div>
+                <div style="background: #fdfdfd; padding: 12px; border: 1px dashed var(--border-color); font-size: 15px;">
+                    <strong>Good Presentation Skills:</strong><br>
+                    • Use facial expressions and body language<br>
+                    • Do not speak in a (i) <input type="text" id="q28_1" class="blank-input">.<br>
+                    • Take (ii) <input type="text" id="q28_2" class="blank-input"> when needed to structure sentences correctly.
+                </div>
+                <div class="explanation" id="exp-q28_1"></div>
+                <div class="explanation" id="exp-q28_2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PART 3 PANEL ================= -->
+    <div id="part3" class="tab-panel">
+        <div class="left-pane">
+            <div class="passage-title">An Afternoon at the Community Centre</div>
+            <p>Yesterday afternoon, Tom visited the Shatin Community Centre to see his cousin, Chris, who was participating in a charity talent show. When Tom arrived at 2:00 p.m., the main hall was already packed with families, and energetic music was playing loudly from the stage speakers.</p>
+            <p>The event kicked off with a vibrant traditional lion dance that immediately captured everyone's attention. Following that, a group of primary school children performed a rhythmic skipping dance. Chris went on stage third to play a classical piece on his violin. Although Chris looked slightly nervous at the beginning, he played beautifully and received loud cheers from the crowd.</p>
+            <p>After the performances concluded at 4:00 p.m., Tom and Chris walked out to the outdoor courtyard. The centre had organized several fun carnival stalls to raise funds for a local animal shelter. Chris wanted to try the game stalls while Tom was drawn to a handicraft booth where volunteers were teaching people how to make traditional paper lanterns. They spent another hour enjoying the activities before heading home together.</p>
+        </div>
+        <div class="right-pane">
+            <div class="instructions">Tom is reading over his diary entry draft about the community centre event. Read the text carefully and answer Questions 29-35.</div>
+            
+            <div class="question-block">
+                <div class="question-text">29. Why did Tom go to the Shatin Community Centre?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q29" value="A"> A. to perform a lion dance</label></li>
+                    <li><label><input type="radio" name="q29" value="B"> B. to learn how to make lanterns</label></li>
+                    <li><label><input type="radio" name="q29" value="C"> C. to support his cousin in a talent show</label></li>
+                    <li><label><input type="radio" name="q29" value="D"> D. to raise money for an animal shelter</label></li>
+                </ul>
+                <div class="explanation" id="exp-q29"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">30. How long did the performances last?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q29_time" value="A"> A. 1 hour</label></li>
+                    <li><label><input type="radio" name="q29_time" value="B"> B. 2 hours</label></li>
+                    <li><label><input type="radio" name="q29_time" value="C"> C. 3 hours</label></li>
+                    <li><label><input type="radio" name="q29_time" value="D"> D. 4 hours</label></li>
+                </ul>
+                <div class="explanation" id="exp-q29_time"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">31. What instrument did Chris play?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q31" value="A"> A. Piano</label></li>
+                    <li><label><input type="radio" name="q31" value="B"> B. Violin</label></li>
+                    <li><label><input type="radio" name="q31" value="C"> C. Guitar</label></li>
+                    <li><label><input type="radio" name="q31" value="D"> D. Drums</label></li>
+                </ul>
+                <div class="explanation" id="exp-q31"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">32. Which statement is TRUE about Chris's performance?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q32" value="A"> A. He was the first performer on stage.</label></li>
+                    <li><label><input type="radio" name="q32" value="B"> B. He felt entirely relaxed from the start.</label></li>
+                    <li><label><input type="radio" name="q32" value="C"> C. The audience did not enjoy his music.</label></li>
+                    <li><label><input type="radio" name="q32" value="D"> D. He performed after the skipping dance.</label></li>
+                </ul>
+                <div class="explanation" id="exp-q32"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">33. What was the purpose of the carnival stalls?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q33" value="A"> A. to sell food to visitors</label></li>
+                    <li><label><input type="radio" name="q33" value="B"> B. to raise funds for an animal shelter</label></li>
+                    <li><label><input type="radio" name="q33" value="C"> C. to recruit volunteers for the centre</label></li>
+                    <li><label><input type="radio" name="q33" value="D"> D. to celebrate the mid-autumn festival</label></li>
+                </ul>
+                <div class="explanation" id="exp-q33"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">34. What did Tom do in the outdoor courtyard?</div>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q34" value="A"> A. He played game stalls.</label></li>
+                    <li><label><input type="radio" name="q34" value="B"> B. He watched a lion dance.</label></li>
+                    <li><label><input type="radio" name="q34" value="C"> C. He visited a paper lantern booth.</label></li>
+                    <li><label><input type="radio" name="q34" value="D"> D. He adopted a pet from the shelter.</label></li>
+                </ul>
+                <div class="explanation" id="exp-q34"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="question-text">35. Put the following events in the correct order. Write 1, 2, 3 and 4 in the boxes.</div>
+                <div style="line-height: 2;">
+                    <input type="text" id="seq_A" class="seq-input" placeholder="No."> Tom and Chris went to the outdoor courtyard.<br>
+                    <input type="text" id="seq_B" class="seq-input" placeholder="No."> A traditional lion dance performance started.<br>
+                    <input type="text" id="seq_C" class="seq-input" placeholder="No."> Chris performed a classical piece on stage.<br>
+                    <input type="text" id="seq_D" class="seq-input" placeholder="No."> Children put on a skipping dance performance.
+                </div>
+                <div class="explanation" id="exp-seq"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer-controls">
+    <div id="score-summary">Choose a part from the Table of Contents to get started.</div>
+    <button class="btn-submit" onclick="checkAnswers()">Check Answers</button>
+</div>
+
+<script>
+    function switchTab(evt, tabId) {
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        const summary = document.getElementById('score-summary');
+        if (tabId === 'contents') {
+            summary.innerHTML = "Choose a part from the Table of Contents to get started.";
+            summary.className = "";
+        } else {
+            summary.innerHTML = "Answer all questions and click check!";
+            summary.className = "";
+        }
+    }
+
+    function checkAnswers() {
+        // Prevent validating when on the landing contents page
+        if (document.getElementById('contents').classList.contains('active')) {
+            alert('Please choose Part 1, Part 2, or Part 3 from the menu tabs to start your test before checking answers.');
+            return;
+        }
+
+        let score = 0;
+        let totalQuestions = 20; // 7 from Part 1, 7 from Part 2, 6 from Part 3
+
+        const solutions = {
+            q17: { ans: "B", exp: "Correct Answer: B. The text mentions it has 'attracted more than 5 million local and overseas visitors over the past 20 years', establishing it as a highly successful annual winter staple event[cite: 1]." },
+            q18: { ans: "C", exp: "Correct Answer: C. The passage reads: 'Many believe that regularly drinking herbal tea can prevent them from getting sick,' pointing directly to health maintenance[cite: 1]." },
+            q19: { ans: "A", exp: "Correct Answer: A. The text explicitly asserts: 'Everything is baked on-the-spot!', proving snacks are freshly baked[cite: 1]." },
+            q20: { ans: "B", exp: "Correct Answer: B. Stall G19 features an American-born Chinese chef who blends 'the best of the East and West together', matching Tom's goal to taste food from around the world[cite: 1]." },
+            q21: { ans: "A", exp: "Correct Answer: A. The leaflet targets travelers ('planning a trip to Hong Kong') and features various gourmet food stalls, indicating a theme of Food and Travel[cite: 1]." },
+            q22_1: { ans: "famous", exp: "Correct Answer: famous. Derived directly from Hiss Hiss stall copy: 'Nowadays, it is very famous among Hongkongers...'[cite: 1]" },
+            q22_2: { ans: "warm", exp: "Correct Answer: warm. Derived directly from Hiss Hiss stall copy: '...can warm you up in minutes!'[cite: 1]" },
+            
+            q23: { ans: "D", exp: "Correct Answer: D. The sentence immediately moves on to cover non-verbal items like 'facial expressions, body language' and delivery elements such as 'how to use your voice'[cite: 1]." },
+            q24: { ans: "A", exp: "Correct Answer: A. Paragraph (ii) specifically warns: '...and they might get tired of listening to you'[cite: 1]." },
+            q25: { ans: "B", exp: "Correct Answer: B. The author introduces this line to reveal that without a well-timed pause, the structural meaning changes entirely into an unexpected statement[cite: 1]." },
+            q26: { ans: "B", exp: "Correct Answer: B. The paragraph discusses pacing issues ('control their speed', 'speaking rapidly', 'slow down'), making 'Watch your speed' the ideal sub-heading[cite: 1]." },
+            q27: { ans: "B", exp: "Correct Answer: B. The entire piece serves as an instructive assembly of practical tips and skills for making better school presentations[cite: 1]." },
+            q28_1: { ans: "rush", exp: "Correct Answer: rush. Match with: 'When you deliver a speech in a rush, it is hard for the audience to follow...'[cite: 1]" },
+            q28_2: { ans: "pauses", exp: "Correct Answer: pauses. Match with: '...by taking pauses whenever needed'[cite: 1]." },
+
+            q29: { ans: "C", exp: "Correct Answer: C. Paragraph 1 highlights Tom went to 'see his cousin, Chris, who was participating in a charity talent show'." },
+            q29_time: { ans: "B", exp: "Correct Answer: B. The text states Tom arrived at 2:00 p.m. and performances concluded at 4:00 p.m., tracking to a total duration of 2 hours." },
+            q31: { ans: "B", exp: "Correct Answer: B. Paragraph 2 mentions Chris went up to play 'a classical piece on his violin'." },
+            q32: { ans: "D", exp: "Correct Answer: D. The text lists the skipping dance as second and explicitly states 'Chris went on stage third', directly following them." },
+            q33: { ans: "B", exp: "Correct Answer: B. Paragraph 3 reveals the carnival stalls were put together 'to raise funds for a local animal shelter'." },
+            q34: { ans: "C", exp: "Correct Answer: C. Paragraph 3 observes that 'Tom was drawn to a handicraft booth where volunteers were teaching people how to make traditional paper lanterns'." },
+            seq: { exp: "Correct Sequence: 4, 1, 3, 2. The order of events is: (1) Lion dance starts, (2) Children perform skipping dance, (3) Chris plays violin piece, (4) They exit to the courtyard." }
+        };
+
+        // Reset Styles
+        document.querySelectorAll('.explanation').forEach(el => {
+            el.style.display = 'none';
+            el.className = 'explanation';
+        });
+
+        // Evaluation Function for Standard MCQs
+        function checkMCQ(qId, target) {
+            const selected = document.querySelector(`input[name="${qId}"]:checked`);
+            const div = document.getElementById(`exp-${qId}`);
+            div.style.display = "block";
+            if (selected && selected.value === target) {
+                score++;
+                div.innerHTML = "&#9989; " + solutions[qId].exp;
+                div.className = "explanation correct";
+            } else {
+                div.innerHTML = "&#10060; " + solutions[qId].exp;
+                div.className = "explanation incorrect";
+            }
+        }
+
+        // Evaluation Function for Fill-in-Blanks
+        function checkBlank(id, target) {
+            const val = document.getElementById(id).value.trim().toLowerCase();
+            const div = document.getElementById(`exp-${id}`);
+            div.style.display = "block";
+            if (val === target.toLowerCase()) {
+                score++;
+                div.innerHTML = "&#9989; " + solutions[id].exp;
+                div.className = "explanation correct";
+            } else {
+                div.innerHTML = "&#10060; " + solutions[id].exp;
+                div.className = "explanation incorrect";
+            }
+        }
+
+        // Part 1 Evaluation
+        checkMCQ("q17", "B");
+        checkMCQ("q18", "C");
+        checkMCQ("q19", "A");
+        checkMCQ("q20", "B");
+        checkMCQ("q21", "A");
+        checkBlank("q22_1", "famous");
+        checkBlank("q22_2", "warm");
+
+        // Part 2 Evaluation
+        checkMCQ("q23", "D");
+        checkMCQ("q24", "A");
+        checkMCQ("q25", "B");
+        checkMCQ("q26", "B");
+        checkMCQ("q27", "B");
+        checkBlank("q28_1", "rush");
+        checkBlank("q28_2", "pauses");
+
+        // Part 3 Evaluation
+        checkMCQ("q29", "C");
+        checkMCQ("q29_time", "B");
+        checkMCQ("q31", "B");
+        checkMCQ("q32", "D");
+        checkMCQ("q33", "B");
+        checkMCQ("q34", "C");
+
+        // Sequence Question Evaluation
+        const sA = document.getElementById('seq_A').value.trim();
+        const sB = document.getElementById('seq_B').value.trim();
+        const sC = document.getElementById('seq_D').value.trim(); 
+        const sD = document.getElementById('seq_C').value.trim(); 
+        
+        const seqDiv = document.getElementById('exp-seq');
+        seqDiv.style.display = "block";
+        
+        if (sA === "4" && sB === "1" && sD === "3" && sC === "2") {
+            score++;
+            seqDiv.innerHTML = "&#9989; " + solutions.seq.exp;
+            seqDiv.className = "explanation correct";
+        } else {
+            seqDiv.innerHTML = "&#10060; " + solutions.seq.exp;
+            seqDiv.className = "explanation incorrect";
+        }
+
+        // Display Calculated Score
+        const summary = document.getElementById('score-summary');
+        summary.innerHTML = `Total Test Score: ${score} / ${totalQuestions}`;
+        if (score >= (totalQuestions / 2)) {
+            summary.className = "score-good";
+        } else {
+            summary.className = "score-bad";
+        }
+    }
+</script>
+
+</body>
+</html>
