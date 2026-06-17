@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKAT English Pre-S1 Digital Testing Platform</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --success: #22c55e;
+            --success-bg: #f0fdf4;
+            --error: #ef4444;
+            --error-bg: #fef2f2;
+            --gray-light: #f8fafc;
+            --gray-border: #cbd5e1;
+            --text-main: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab.active {
+            background: var(--primary-light);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .view-panel {
+            display: none;
+            width: 100%;
+            flex: 1;
+        }
+
+        .view-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Home Dashboard View */
+        .dashboard {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border-top: 6px solid var(--primary);
+        }
+
+        .welcome-card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-card ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .welcome-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .section-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid var(--gray-border);
+            transition: transform 0.2s;
+        }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-card h3 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .btn {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #16a34a; }
+
+        /* Split Screen Assessment View */
+        .split-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 125px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .left-panel {
+            width: 50%;
+            overflow-y: auto;
+            padding: 2rem;
+            background: white;
+            border-right: 1px solid var(--gray-border);
+        }
+
+        .right-panel {
+            width: 50%;
+            overflow-y: auto;
+            padding: 2rem;
+            background: var(--gray-light);
+            padding-bottom: 6rem;
+        }
+
+        /* Reading Passage Elements */
+        .passage-meta {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .passage-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .passage-body {
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .passage-body p {
+            margin-bottom: 1.25rem;
+        }
+
+        .stall-block {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary-light);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 0.375rem 0.375rem 0;
+        }
+
+        .stall-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            color: var(--secondary);
+        }
+
+        /* Question Elements */
+        .question-group-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed var(--gray-border);
+        }
+
+        .question-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--gray-border);
+        }
+
+        .question-card.correct { border-left: 6px solid var(--success); }
+        .question-card.incorrect { border-left: 6px solid var(--error); }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .options-list {
+            list-style: none;
+        }
+
+        .option-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--gray-light);
+        }
+
+        .option-label input {
+            margin-top: 0.2rem;
+            margin-right: 0.75rem;
+        }
+
+        /* Selected / Evaluated Option States */
+        .option-label.selected {
+            border-color: var(--primary-light);
+            background-color: #eff6ff;
+        }
+        .option-label.eval-correct {
+            border-color: var(--success);
+            background-color: var(--success-bg);
+            color: #16a34a;
+            font-weight: 600;
+        }
+        .option-label.eval-incorrect {
+            border-color: var(--error);
+            background-color: var(--error-bg);
+            color: #dc2626;
+        }
+
+        /* Inline Forms / Controls */
+        .inline-blank {
+            width: 140px;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--gray-border);
+            border-radius: 0.25rem;
+            font-size: 0.95rem;
+            margin: 0 0.25rem;
+            text-align: center;
+        }
+        .inline-blank.eval-correct { background-color: var(--success-bg); border-color: var(--success); color: #16a34a; font-weight: bold; }
+        .inline-blank.eval-incorrect { background-color: var(--error-bg); border-color: var(--error); color: #dc2626; font-weight: bold; }
+
+        .dropdown-select {
+            padding: 0.4rem;
+            border: 1px solid var(--gray-border);
+            border-radius: 0.25rem;
+            font-size: 0.95rem;
+            max-width: 100%;
+            margin-top: 0.25rem;
+        }
+        .dropdown-select.eval-correct { background-color: var(--success-bg); border-color: var(--success); color: #16a34a; font-weight: bold; }
+        .dropdown-select.eval-incorrect { background-color: var(--error-bg); border-color: var(--error); color: #dc2626; font-weight: bold; }
+
+        .paragraph-text-block {
+            line-height: 2;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--gray-border);
+        }
+
+        /* Feedback Element */
+        .feedback-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            display: none;
+            font-size: 0.95rem;
+        }
+        .feedback-box.correct { display: block; background-color: var(--success-bg); border: 1px solid var(--success); color: #15803d; }
+        .feedback-box.incorrect { display: block; background-color: var(--error-bg); border: 1px solid var(--error); color: #b91c1c; }
+        .feedback-box strong { display: block; margin-bottom: 0.25rem; font-size: 1rem; }
+
+        /* Fixed Action Bar */
+        .action-bar {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            right: 0;
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--gray-border);
+            z-index: 50;
+        }
+
+        .score-display {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Summary View styles */
+        .summary-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            width: 100%;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .summary-badge {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid var(--gray-border);
+            transition: all 0.2s;
+        }
+
+        .summary-badge.correct { background: var(--success-bg); border-color: var(--success); color: #16a34a; }
+        .summary-badge.incorrect { background: var(--error-bg); border-color: var(--error); color: #dc2626; }
+        .summary-badge.unanswered { background: #f1f5f9; color: #64748b; }
+        .summary-badge:hover { transform: scale(1.03); }
+
+        /* Responsive Mobile Layout fallback */
+        @media (max-width: 850px) {
+            .split-container {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .left-panel, .right-panel {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+            .action-bar {
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            }
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>Hong Kong Attainment Test (Pre-Secondary One)</h1>
+            <p>English Language Reading Assessment Platform</p>
+        </div>
+        <nav>
+            <button class="nav-tab active" onclick="switchView('home')">Home</button>
+            <button class="nav-tab" onclick="switchView('part1')">Part 1 (Q17-22)</button>
+            <button class="nav-tab" onclick="switchView('part2')">Part 2 (Q23-28)</button>
+            <button class="nav-tab" onclick="switchView('part3')">Part 3 (Q29-35)</button>
+            <button class="nav-tab" onclick="switchView('summary')">Summary Results</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="view-home" class="view-panel active">
+            <div class="dashboard">
+                <div class="welcome-card">
+                    <h2>Welcome to the Digital Reading Assessment Portfolio</h2>
+                    <p>Please select an individual subset block below to begin.</p>
+                    <ul>
+                       
+                    </ul>
+                </div>
+                <div class="sections-grid">
+                    <div class="section-card">
+                        <h3>Section B: Part 1</h3>
+                        <p>Leaflet Feature: "Savour Hong Kong". Comprehensive cultural exploration featuring multiple choice criteria and localized spelling configurations (Q17-22).</p>
+                        <button class="btn" onclick="switchView('part1')">Start Section</button>
+                    </div>
+                    <div class="section-card">
+                        <h3>Section B: Part 2</h3>
+                        <p>Instructional Exposition: "How to Be a Good Speaker". Public speaking guidelines focusing on non-verbal syntax adjustments and structural paragraph mapping (Q23-28).</p>
+                        <button class="btn" onclick="switchView('part2')">Start Section</button>
+                    </div>
+                    <div class="section-card">
+                        <h3>Section B: Part 3</h3>
+                        <p>Personal Log Entry: "Carnival Fun". Relational reading evaluation tasks incorporating dynamic chronological graphic and sequential timeline mapping indices (Q29-35).</p>
+                        <button class="btn" onclick="switchView('part3')">Start Section</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-part1" class="view-panel">
+            <div class="split-container">
+                <div class="left-panel">
+                    <span class="passage-meta">Section B - Part 1 (12 Marks)</span>
+                    <h2 class="passage-title">Savour Hong Kong</h2>
+                    <div class="passage-body">
+                        <p>If you are reading this, you might be planning a trip to Hong Kong. One thing not to be missed is the Hong Kong Tourism Board's annual event, Savour Hong Kong. It has attracted more than 5 million local and overseas visitors over the past 20 years, and is a 'must-go-to' winter event. This year, we aim to provide our visitors with the most extraordinary flavours from all around the world. Visit our webpage (http://savourhk.lovehk.com) for the latest news and events.</p>
+                        <p><strong>Date:</strong> 15<sup>th</sup> - 30<sup>th</sup> December, 2020<br>
+                        <strong>Time:</strong> 10:30 a.m. - 8:00 p.m.<br>
+                        <strong>Venue:</strong> Central Harbourfront Event Space<br>
+                        <strong>Admission Fee:</strong> $20 per person (free for children aged 3 or below and seniors aged 65 or above)</p>
+                        
+                        <div class="stall-block">
+                            <div class="stall-title">Natural Drinker (Stall: M06)</div>
+                            <p>For thousands of years, herbal tea has been popular with Chinese people who dislike going to see the doctor and taking pills. Many believe that regularly drinking herbal tea can prevent them from getting sick. Although most of the teas are black, not all of them are bitter. Come and experience the magic of Chinese plants and fruit yourself!</p>
+                        </div>
+
+                        <div class="stall-block">
+                            <div class="stall-title">Pearl of the Orient (Stall: F30)</div>
+                            <p>Hexagoners, and people from all over the world, line up to try our local snacks. Excite your taste buds with our famous fresh pineapple buns and egg tarts. Everything is baked on-the-spot! Feeling sleepy after your long flight? Try our 'yuen yeung' a famous local drink made by mixing milk tea with coffee! You will surely feel energised!</p>
+                        </div>
+
+                        <div class="stall-block">
+                            <div class="stall-title">Neo-Canton (Stall: G19)</div>
+                            <p>Let our American-born Chinese chef change how you feel about dim sum. Try our famous piggy-shaped barbecue pork buns, shrimp dumplings made with tomato-flavoured wrappers and chicken feet in lemonade. We bring the best of the East and West together for you to taste. How can you say 'no' to high-quality food at low prices?</p>
+                        </div>
+
+                        <div class="stall-block">
+                            <div class="stall-title">Hiss Hiss (Stall: K22)</div>
+                            <p>Are you afraid of snakes? What if they are cooked? Seasonal snake soup was one of the favourite dishes of ancient Chinese emperors on cold, icy days. Nowadays, it is very famous among Hongkongers, but some still find it strange. Its main ingredients are fresh snake meat, chicken, ginger and mushrooms. You will be surprised how drinking snake soup can warm you up in minutes!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <div class="question-group-title">Choose the best answers for Questions 17-21 and complete Question 22.</div>
+                    
+                    <div class="question-card" id="qc-17">
+                        <div class="question-text">17. Savour Hong Kong ______</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="17" data-opt="A"><input type="radio" name="q17" value="A"> A. is free for all children</label></li>
+                            <li class="option-item"><label class="option-label" data-q="17" data-opt="B"><input type="radio" name="q17" value="B"> B. has been a successful event</label></li>
+                            <li class="option-item"><label class="option-label" data-q="17" data-opt="C"><input type="radio" name="q17" value="C"> C. is organised for overseas visitors only</label></li>
+                            <li class="option-item"><label class="option-label" data-q="17" data-opt="D"><input type="radio" name="q17" value="D"> D. attracts over 5 million visitors every year.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-17"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-18">
+                        <div class="question-text">18. According to Natural Drinker, why is herbal tea popular?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="18" data-opt="A"><input type="radio" name="q18" value="A"> A. It can replace doctors.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="18" data-opt="B"><input type="radio" name="q18" value="B"> B. It is not as bitter as pills.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="18" data-opt="C"><input type="radio" name="q18" value="C"> C. It can keep people healthy.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="18" data-opt="D"><input type="radio" name="q18" value="D"> D. It is made with plants and fruit.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-18"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-19">
+                        <div class="question-text">19. Which is TRUE about the Pearl of the Orient?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="19" data-opt="A"><input type="radio" name="q19" value="A"> A. The snacks are freshly baked.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="19" data-opt="B"><input type="radio" name="q19" value="B"> B. The stall only sells food to tourists.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="19" data-opt="C"><input type="radio" name="q19" value="C"> C. Their milk tea and coffee are special.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="19" data-opt="D"><input type="radio" name="q19" value="D"> D. Their food helps with sleeping problems.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-19"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-20">
+                        <div class="question-text">20. Tom likes to try new food from around the world. Which stall should he visit?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="20" data-opt="A"><input type="radio" name="q20" value="A"> A. F30</label></li>
+                            <li class="option-item"><label class="option-label" data-q="20" data-opt="B"><input type="radio" name="q20" value="B"> B. G19</label></li>
+                            <li class="option-item"><label class="option-label" data-q="20" data-opt="C"><input type="radio" name="q20" value="C"> C. K22</label></li>
+                            <li class="option-item"><label class="option-label" data-q="20" data-opt="D"><input type="radio" name="q20" value="D"> D. M06</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-20"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-21">
+                        <div class="question-text">21. What is the theme of the leaflet?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="21" data-opt="A"><input type="radio" name="q21" value="A"> A. Food and Travel</label></li>
+                            <li class="option-item"><label class="option-label" data-q="21" data-opt="B"><input type="radio" name="q21" value="B"> B. Food and Health</label></li>
+                            <li class="option-item"><label class="option-label" data-q="21" data-opt="C"><input type="radio" name="q21" value="C"> C. History and Travel</label></li>
+                            <li class="option-item"><label class="option-label" data-q="21" data-opt="D"><input type="radio" name="q21" value="D"> D. Health and History</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-21"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-22">
+                        <div class="question-text">22. Tom is writing a message to his friend, Sam. Help him complete the sentences. Use only ONE word for each blank.</div>
+                        <div class="paragraph-text-block">
+                            Let's go to Savour Hong Kong together during the Christmas holiday. You should try the snake soup. Today, it is very 
+                            (i) <input type="text" id="q22_1" class="inline-blank" placeholder="word"> in Hong Kong, but some people don't like it. 
+                            It's perfect for winter because it can keep you 
+                            (ii) <input type="text" id="q22_2" class="inline-blank" placeholder="word"> on cold days...
+                        </div>
+                        <div class="feedback-box" id="fb-22"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <span class="score-display" id="score-part1">Score: --</span>
+                    <button class="btn btn-success" onclick="evaluateSection('part1')">Check Answers</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-part2" class="view-panel">
+            <div class="split-container">
+                <div class="left-panel">
+                    <span class="passage-meta">Section B - Part 2 (12 Marks)</span>
+                    <h2 class="passage-title">How to Be a Good Speaker</h2>
+                    <div class="passage-body">
+                        <p>If the thought of speaking in front of the class gives you cold sweats, you are not alone. Learning certain speaking skills can help you gain confidence and make an impressive presentation. Here are some tips for you.</p>
+                        
+                        <p><strong>Paragraph (i)</strong><br>
+                        Everyone knows the importance of having interesting ideas in a presentation. However, there are other essential things. According to Roy M. Berko, an expert in communication, only 7% of the meaning comes from the words used. 93% of the meaning of what people say comes from non-verbal signals, such as facial expressions and body language. How to use your voice is also important. The emotions in your voice have to match what you are saying. An appropriate tone and style should also be used during your presentation.</p>
+                        
+                        <p><strong>Paragraph (ii)</strong><br>
+                        While giving a presentation, most speakers find it difficult to control their speed, especially when they are nervous. You may think that speaking rapidly like lightning would help you relax. However, it does not help you give a good presentation. When you deliver a speech in a rush, it is hard for the audience to follow, and they might get tired of listening to you. Why not slow down to let your words be heard more clearly and to be better understood?</p>
+                        
+                        <p><strong>Paragraph (iii)</strong><br>
+                        You should also pay extra attention to how you break down a sentence into parts by taking pauses whenever needed. For example, when you say 'Let's eat, Grandpa', you have to pause after 'eat' so that the sentence sounds like a friendly invitation. Otherwise, people may think that you are asking others to 'eat Grandpa' with you! Pausing correctly can save you from an embarrassing situation.</p>
+                        
+                        <p><strong>Paragraph (iv)</strong><br>
+                        To conclude, your non-verbal signals, tone, speed and pauses all contribute to how well your audience understands your presentation. Practise more and you will be able to give an impressive presentation confidently next time!</p>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <div class="question-group-title">Choose the best answers for Questions 23-27 and complete Question 28.</div>
+                    
+                    <div class="question-card" id="qc-23">
+                        <div class="question-text">23. Why does the writer say 'you are not alone' in paragraph 1?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="23" data-opt="A"><input type="radio" name="q23" value="A"> A. Other people are sweating too.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="23" data-opt="B"><input type="radio" name="q23" value="B"> B. Other people are doing a presentation too.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="23" data-opt="C"><input type="radio" name="q23" value="C"> C. Other people want to learn speaking skills too.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="23" data-opt="D"><input type="radio" name="q23" value="D"> D. Other people get nervous speaking in public too.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-23"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-24">
+                        <div class="question-text">24. According to Roy M. Berko, most people do NOT rely on ______ when trying to understand what others say.</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="24" data-opt="A"><input type="radio" name="q24" value="A"> A. tone</label></li>
+                            <li class="option-item"><label class="option-label" data-q="24" data-opt="B"><input type="radio" name="q24" value="B"> B. words</label></li>
+                            <li class="option-item"><label class="option-label" data-q="24" data-opt="C"><input type="radio" name="q24" value="C"> C. emotions</label></li>
+                            <li class="option-item"><label class="option-label" data-q="24" data-opt="D"><input type="radio" name="q24" value="D"> D. body language</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-24"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-25">
+                        <div class="question-text">25. In paragraph 3, what is the problem with speaking too fast?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="25" data-opt="A"><input type="radio" name="q25" value="A"> A. The speaker would be tired.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="25" data-opt="B"><input type="radio" name="q25" value="B"> B. The audience would not relax.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="25" data-opt="C"><input type="radio" name="q25" value="C"> C. The speaker would be nervous.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="25" data-opt="D"><input type="radio" name="q25" value="D"> D. The audience would not understand.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-25"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-26">
+                        <div class="question-text">26. The example of saying 'Let's eat, Grandpa' in paragraph 4 is to ______</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="26" data-opt="A"><input type="radio" name="q26" value="A"> A. show the importance of pauses</label></li>
+                            <li class="option-item"><label class="option-label" data-q="26" data-opt="B"><input type="radio" name="q26" value="B"> B. show the importance of an invitation</label></li>
+                            <li class="option-item"><label class="option-label" data-q="26" data-opt="C"><input type="radio" name="q26" value="C"> C. encourage people to eat with Grandpa</label></li>
+                            <li class="option-item"><label class="option-label" data-q="26" data-opt="D"><input type="radio" name="q26" value="D"> D. encourage people to be friendly to Grandpa</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-26"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-27">
+                        <div class="question-text">27. What is the main purpose of the article?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="27" data-opt="A"><input type="radio" name="q27" value="A"> A. to give advice</label></li>
+                            <li class="option-item"><label class="option-label" data-q="27" data-opt="B"><input type="radio" name="q27" value="B"> B. to report a problem</label></li>
+                            <li class="option-item"><label class="option-label" data-q="27" data-opt="C"><input type="radio" name="q27" value="C"> C. to argue opposite ideas</label></li>
+                            <li class="option-item"><label class="option-label" data-q="27" data-opt="D"><input type="radio" name="q27" value="D"> D. to entertain with a story</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-27"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-28">
+                        <div class="question-text">28. Match the matching headings (A-D) with paragraphs (i) to (iv).</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div>
+                                <strong>Paragraph (i):</strong>
+                                <select id="q28_1" class="dropdown-select">
+                                    <option value="">-- Choose Heading --</option>
+                                    <option value="A">A. Take Your Time</option>
+                                    <option value="B">B. Speak with Feeling</option>
+                                    <option value="C">C. Pause Appropriately</option>
+                                    <option value="D">D. Practice Makes Perfect</option>
+                                </select>
+                            </div>
+                            <div>
+                                <strong>Paragraph (ii):</strong>
+                                <select id="q28_2" class="dropdown-select">
+                                    <option value="">-- Choose Heading --</option>
+                                    <option value="A">A. Take Your Time</option>
+                                    <option value="B">B. Speak with Feeling</option>
+                                    <option value="C">C. Pause Appropriately</option>
+                                    <option value="D">D. Practice Makes Perfect</option>
+                                </select>
+                            </div>
+                            <div>
+                                <strong>Paragraph (iii):</strong>
+                                <select id="q28_3" class="dropdown-select">
+                                    <option value="">-- Choose Heading --</option>
+                                    <option value="A">A. Take Your Time</option>
+                                    <option value="B">B. Speak with Feeling</option>
+                                    <option value="C">C. Pause Appropriately</option>
+                                    <option value="D">D. Practice Makes Perfect</option>
+                                </select>
+                            </div>
+                            <div>
+                                <strong>Paragraph (iv):</strong>
+                                <select id="q28_4" class="dropdown-select">
+                                    <option value="">-- Choose Heading --</option>
+                                    <option value="A">A. Take Your Time</option>
+                                    <option value="B">B. Speak with Feeling</option>
+                                    <option value="C">C. Pause Appropriately</option>
+                                    <option value="D">D. Practice Makes Perfect</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="feedback-box" id="fb-28"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <span class="score-display" id="score-part2">Score: --</span>
+                    <button class="btn btn-success" onclick="evaluateSection('part2')">Check Answers</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-part3" class="view-panel">
+            <div class="split-container">
+                <div class="left-panel">
+                    <span class="passage-meta">Section B - Part 3 (14 Marks)</span>
+                    <h2 class="passage-title">Carnival Fun</h2>
+                    <div class="passage-body">
+                        <p>The world-famous ABC Carnival has come back to the New Central Harbourfront this Christmas. After waiting for a year, finally I got the chance to go there again yesterday. Since Uncle Sam from Canada has returned to Hong Kong, we decided to have some fun together at the carnival. It was a Friday afternoon and tickets were cheaper than expected. How lucky we were!</p>
+                        <p>When Uncle Sam and I arrived at the carnival, our jaws dropped. We didn't expect to see so many different attractions in such a small area in Central. We didn't even know where to start. I wanted to start with the game stalls, but Uncle Sam suggested going on the rides first so that we wouldn't have to carry any big soft toys around with us.</p>
+                        <p>On our way to the rides, we grabbed some hot dogs and drinks because we didn't want to wait for hours to eat in the open-air cafe. Seeing the long queues for the rides, we thought we would be bored to death. Fortunately, while waiting, some street artists were performing nearby. They were very entertaining. The rides were so exciting and Uncle Sam screamed and laughed even louder than I did. He usually looks serious but that day I couldn't believe he was such a kidult!</p>
+                        <p>I've posted some selfies here. The first picture shows the delicious hot dogs. How fun it is to see my scared face on the rides in the second picture! But I like the third picture most because both Uncle Sam and I are making funny faces, and I am holding my favourite teddy bear in my arms. Uncle Sam looks particularly silly with the bunny ears on his head!</p>
+                        <p>Playing stall games at the end of the day was the most unforgettable experience as Uncle Sam won five toys for me. Thanks, Uncle Sam!</p>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <div class="question-group-title">Choose the best answers for Questions 29-34 and complete Question 35.</div>
+                    
+                    <div class="question-card" id="qc-29">
+                        <div class="question-text">29. Tom went to the carnival because ______</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="29" data-opt="A"><input type="radio" name="q29" value="A"> A. tickets were cheaper that day</label></li>
+                            <li class="option-item"><label class="option-label" data-q="29" data-opt="B"><input type="radio" name="q29" value="B"> B. the carnival was very famous</label></li>
+                            <li class="option-item"><label class="option-label" data-q="29" data-opt="C"><input type="radio" name="q29" value="C"> C. he had never been there before</label></li>
+                            <li class="option-item"><label class="option-label" data-q="29" data-opt="D"><input type="radio" name="q29" value="D"> D. his uncle came back to Hong Kong</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-29"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-30">
+                        <div class="question-text">30. How did Uncle Sam and Tom feel when they arrived at the carnival?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="30" data-opt="A"><input type="radio" name="q30" value="A"> A. bored</label></li>
+                            <li class="option-item"><label class="option-label" data-q="30" data-opt="B"><input type="radio" name="q30" value="B"> B. happy</label></li>
+                            <li class="option-item"><label class="option-label" data-q="30" data-opt="C"><input type="radio" name="q30" value="C"> C. scared</label></li>
+                            <li class="option-item"><label class="option-label" data-q="30" data-opt="D"><input type="radio" name="q30" value="D"> D. surprised</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-30"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-31">
+                        <div class="question-text">31. Tom thought that Uncle Sam was a kidult because he ______</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="31" data-opt="A"><input type="radio" name="q31" value="A"> A. looked serious</label></li>
+                            <li class="option-item"><label class="option-label" data-q="31" data-opt="B"><input type="radio" name="q31" value="B"> B. went on the rides</label></li>
+                            <li class="option-item"><label class="option-label" data-q="31" data-opt="C"><input type="radio" name="q31" value="C"> C. carried big soft toys</label></li>
+                            <li class="option-item"><label class="option-label" data-q="31" data-opt="D"><input type="radio" name="q31" value="D"> D. screamed and laughed loudly</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-31"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-32">
+                        <div class="question-text">32. Which of the following is TRUE about Uncle Sam and Tom's experience at the carnival?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="32" data-opt="A"><input type="radio" name="q32" value="A"> A. They enjoyed the rides very much.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="32" data-opt="B"><input type="radio" name="q32" value="B"> B. They had lunch in an open-air cafe.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="32" data-opt="C"><input type="radio" name="q32" value="C"> C. They waited for two hours for the rides.</label></li>
+                            <li class="option-item"><label class="option-label" data-q="32" data-opt="D"><input type="radio" name="q32" value="D"> D. They thought the street performances were boring.</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-32"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-33">
+                        <div class="question-text">33. Which is Tom's favourite photo?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="33" data-opt="A"><input type="radio" name="q33" value="A"> A. The first picture (showing delicious hot dogs)</label></li>
+                            <li class="option-item"><label class="option-label" data-q="33" data-opt="B"><input type="radio" name="q33" value="B"> B. The second picture (showing his scared face on rides)</label></li>
+                            <li class="option-item"><label class="option-label" data-q="33" data-opt="C"><input type="radio" name="q33" value="C"> C. The third picture (making funny faces, holding a teddy bear)</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-33"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-34">
+                        <div class="question-text">34. Which of the following did Tom enjoy most?</div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="34" data-opt="A"><input type="radio" name="q34" value="A"> A. taking selfies</label></li>
+                            <li class="option-item"><label class="option-label" data-q="34" data-opt="B"><input type="radio" name="q34" value="B"> B. going on rides</label></li>
+                            <li class="option-item"><label class="option-label" data-q="34" data-opt="C"><input type="radio" name="q34" value="C"> C. eating hot dogs</label></li>
+                            <li class="option-item"><label class="option-label" data-q="34" data-opt="D"><input type="radio" name="q34" value="D"> D. playing stall games</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-34"></div>
+                    </div>
+
+                    <div class="question-card" id="qc-35">
+                        <div class="question-text">35. Arrange the events in the correct chronological order as described in the blog entry:</div>
+                        <div style="margin-left:0.5rem; margin-bottom:0.75rem; font-size:0.9rem; line-height:1.5;">
+                            X: Eating hot dogs and drinks<br>
+                            Y: Playing stall games and winning toys<br>
+                            Z: Arriving at the carnival and looking at attractions
+                        </div>
+                        <ul class="options-list">
+                            <li class="option-item"><label class="option-label" data-q="35" data-opt="A"><input type="radio" name="q35" value="A"> A. Z &rarr; X &rarr; Y</label></li>
+                            <li class="option-item"><label class="option-label" data-q="35" data-opt="B"><input type="radio" name="q35" value="B"> B. X &rarr; Z &rarr; Y</label></li>
+                            <li class="option-item"><label class="option-label" data-q="35" data-opt="C"><input type="radio" name="q35" value="C"> C. Z &rarr; Y &rarr; X</label></li>
+                            <li class="option-item"><label class="option-label" data-q="35" data-opt="D"><input type="radio" name="q35" value="D"> D. Y &rarr; X &rarr; Z</label></li>
+                        </ul>
+                        <div class="feedback-box" id="fb-35"></div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <span class="score-display" id="score-part3">Score: --</span>
+                    <button class="btn btn-success" onclick="evaluateSection('part3')">Check Answers</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-summary" class="view-panel">
+            <div class="summary-container">
+                <h2>Final Results Summary</h2>
+                <p>Click any item map box below to jump back to its contextual passage panel and comprehensive structural evaluation rationale analysis layout.</p>
+                
+                <div class="summary-grid" id="summary-badge-grid">
+                    </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn" onclick="switchView('home')">Return to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global Evaluation State Storage Engine
+        const quizEngine = {
+            part1: {
+                evaluated: false,
+                questions: {
+                    17: { type: 'mc', correct: 'B', exp: "The passage states it 'has attracted more than 5 million local and overseas visitors over the past 20 years', establishing its long-term consistency and proven local success." },
+                    18: { type: 'mc', correct: 'C', exp: "The text explicitly specifies that 'Many believe that regularly drinking herbal tea can prevent them from getting sick', directly equating popularity with health preservation." },
+                    19: { type: 'mc', correct: 'A', exp: "The text guarantees high quality parameters by directly noting that 'Everything is baked on-the-spot!' which directly confirms freshly baked item features." },
+                    20: { type: 'mc', correct: 'B', exp: "Stall G19 (Neo-Canton) boasts an American-born Chinese chef explicitly combining the 'best of the East and West together', matching criteria for trying global food fusions." },
+                    21: { type: 'mc', correct: 'A', exp: "The general content details local Hong Kong delicacies ('Savour Hong Kong') contextually localized explicitly for arriving travelers planning a trip." },
+                    22: { type: 'blank', correct: ['famous', 'warm'], exp: "(i) The text explicitly calls it 'very famous among Hongkongers'. (ii) The leaflet promises drinking it will 'warm you up in minutes'." }
+                }
+            },
+            part2: {
+                evaluated: false,
+                questions: {
+                    23: { type: 'mc', correct: 'D', exp: "The intro links 'cold sweats' over public speaking with 'you are not alone', confirming common group anxiety experiences." },
+                    24: { type: 'mc', correct: 'B', exp: "Roy M. Berko states only 7% of meaning comes from words, meaning 93% relies heavily on non-verbal signals, style, and tone rather than words." },
+                    25: { type: 'mc', correct: 'D', exp: "Paragraph 3 outlines that when speaking too fast, it is hard for the audience to follow, preventing complete clarity and proper comprehension." },
+                    26: { type: 'mc', correct: 'A', exp: "The writer points out that omitting a pause changes 'Let's eat, Grandpa' into a threat, demonstrating how critical correct pause choices are." },
+                    27: { type: 'mc', correct: 'A', exp: "The explicit structural design relies on practical instruction templates ('Here are some tips for you') highlighting an intent to give targeted guidance." },
+                    28: { type: 'matching', correct: ['B', 'A', 'C', 'D'], exp: "(Paragraph i) deals with vocal emotion matches ('Speak with Feeling'). (Paragraph ii) outlines deceleration keys ('Take Your Time'). (Paragraph iii) teaches pause criteria ('Pause Appropriately'). (Paragraph iv) summarizes training habits ('Practice Makes Perfect')." }
+                }
+            },
+            part3: {
+                evaluated: false,
+                questions: {
+                    29: { type: 'mc', correct: 'D', exp: "The textual timeline notes: 'Since Uncle Sam from Canada has returned to Hong Kong, we decided to have some fun together at the carnival.'" },
+                    30: { type: 'mc', correct: 'D', exp: "The author explicitly details that upon entry, 'our jaws dropped. We didn't expect to see so many different attractions', signifying immediate surprise." },
+                    31: { type: 'mc', correct: 'D', exp: "Tom states he couldn't believe Uncle Sam was such a kidult because he 'screamed and laughed even louder than I did'." },
+                    32: { type: 'mc', correct: 'A', exp: "The log tracks optimal ride metrics openly, explicitly identifying that 'The rides were so exciting and Uncle Sam screamed and laughed'." },
+                    33: { type: 'mc', correct: 'C', exp: "Tom explicitly clarifies his preference pattern: 'But I like the third picture most because both Uncle Sam and I are making funny faces...'" },
+                    34: { type: 'mc', correct: 'D', exp: "The author clarifies his definitive favorite: 'Playing stall games at the end of the day was the most unforgettable experience'." },
+                    35: { type: 'mc', correct: 'A', exp: "The sequential story sequence flows cleanly from arriving/attractions look (Z), grabbing hot dogs to eat in line (X), and ending the day with stall games (Y)." }
+                }
+            }
+        };
+
+        // Navigation Engine
+        function switchView(viewId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            const targetPanel = document.getElementById(`view-${viewId}`);
+            if (targetPanel) targetPanel.classList.add('active');
+            
+            // Highlight current tab matching active panel
+            const currentTab = Array.from(document.querySelectorAll('.nav-tab')).find(tab => tab.getAttribute('onclick').includes(viewId));
+            if (currentTab) currentTab.classList.add('active');
+
+            if (viewId === 'summary') {
+                renderSummaryGrid();
+            }
+        }
+
+        // Realtime Event Handler Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.option-label input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const qNum = e.target.name.replace('q', '');
+                    // Clear previous select states on this radio group block
+                    document.querySelectorAll(`.option-label[data-q="${qNum}"]`).forEach(lbl => lbl.classList.remove('selected'));
+                    if (e.target.checked) {
+                        e.target.parentElement.classList.add('selected');
+                    }
+                });
+            });
+        });
+
+        // Evaluation Engine Rule Processor
+        function evaluateSection(partKey) {
+            const partData = quizEngine[partKey];
+            let rawPointsScore = 0;
+            let finalPossiblePoints = 0;
+
+            for (const [qId, qMeta] of Object.entries(partData.questions)) {
+                const qCard = document.getElementById(`qc-${qId}`);
+                const fbBox = document.getElementById(`fb-${qId}`);
+                let userIsCorrect = false;
+
+                if (qMeta.type === 'mc') {
+                    finalPossiblePoints += 2;
+                    const selectedInput = document.querySelector(`input[name="q${qId}"]:checked`);
+                    const selectedOpt = selectedInput ? selectedInput.value : null;
+                    
+                    // Style structural radio fields
+                    document.querySelectorAll(`.option-label[data-q="${qId}"]`).forEach(lbl => {
+                        const optVal = lbl.getAttribute('data-opt');
+                        if (optVal === qMeta.correct) lbl.classList.add('eval-correct');
+                        if (selectedOpt === optVal && selectedOpt !== qMeta.correct) lbl.classList.add('eval-incorrect');
+                    });
+
+                    if (selectedOpt === qMeta.correct) {
+                        userIsCorrect = true;
+                        rawPointsScore += 2;
+                    }
+
+                    showFeedback(fbBox, userIsCorrect, qMeta.correct, qMeta.exp);
+                } 
+                else if (qMeta.type === 'blank') {
+                    // Fill in blanks evaluating individual input values independently
+                    let totalBlanksCorrect = 0;
+                    qMeta.correct.forEach((val, idx) => {
+                        finalPossiblePoints += 1;
+                        const inputEl = document.getElementById(`q22_${idx + 1}`);
+                        if (inputEl) {
+                            const userVal = inputEl.value.trim().toLowerCase();
+                            if (userVal === val.toLowerCase()) {
+                                inputEl.classList.add('eval-correct');
+                                rawPointsScore += 1;
+                                totalBlanksCorrect++;
+                            } else {
+                                inputEl.classList.add('eval-incorrect');
+                            }
+                        }
+                    });
+                    userIsCorrect = (totalBlanksCorrect === qMeta.correct.length);
+                    showFeedback(fbBox, userIsCorrect, qMeta.correct.join(' / '), qMeta.exp);
+                }
+                else if (qMeta.type === 'matching') {
+                    // Match headings checking structural sequence values mapping arrays
+                    let totalMatchesCorrect = 0;
+                    qMeta.correct.forEach((val, idx) => {
+                        finalPossiblePoints += 1;
+                        const selectEl = document.getElementById(`q28_${idx + 1}`);
+                        if (selectEl) {
+                            if (selectEl.value === val) {
+                                selectEl.classList.add('eval-correct');
+                                rawPointsScore += 1;
+                                totalMatchesCorrect++;
+                            } else {
+                                selectEl.classList.add('eval-incorrect');
+                            }
+                        }
+                    });
+                    userIsCorrect = (totalMatchesCorrect === qMeta.correct.length);
+                    showFeedback(fbBox, userIsCorrect, qMeta.correct.join(', '), qMeta.exp);
+                }
+
+                if (qCard) {
+                    qCard.classList.remove('correct', 'incorrect');
+                    qCard.classList.add(userIsCorrect ? 'correct' : 'incorrect');
+                }
+            }
+
+            partData.evaluated = true;
+            document.getElementById(`score-${partKey}`).innerText = `Score: ${rawPointsScore} / ${finalPossiblePoints}`;
+        }
+
+        function showFeedback(box, isCorrect, key, exp) {
+            if (!box) return;
+            box.classList.remove('correct', 'incorrect');
+            box.classList.add(isCorrect ? 'correct' : 'incorrect');
+            box.innerHTML = `<strong>${isCorrect ? '&#10004; Correct' : '&#10008; Incorrect'} (Key: ${key})</strong>${exp}`;
+        }
+
+        // Summary View Builder Engine
+        function renderSummaryGrid() {
+            const container = document.getElementById('summary-badge-grid');
+            container.innerHTML = '';
+
+            for (const [partKey, partData] of Object.entries(quizEngine)) {
+                for (const [qId, qMeta] of Object.entries(partData.questions)) {
+                    const badge = document.createElement('div');
+                    badge.classList.add('summary-badge');
+                    
+                    if (!partData.evaluated) {
+                        badge.classList.add('unanswered');
+                        badge.innerText = `Q${qId}\n(Unevaluated)`;
+                    } else {
+                        // Look up evaluation classes applied to structural containers
+                        const qCard = document.getElementById(`qc-${qId}`);
+                        const isCorrect = qCard && qCard.classList.contains('correct');
+                        badge.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        badge.innerText = `Q${qId}\n(${isCorrect ? 'Correct' : 'Incorrect'})`;
+                    }
+
+                    badge.onclick = () => switchView(partKey);
+                    container.appendChild(badge);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
